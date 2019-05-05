@@ -1,2 +1,2 @@
 # jsx
-Java Library -- Simple Editor Parser XML
+Java Library -- Simple Editor Parser for XML
