@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -26,54 +28,161 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 import it.jsx.exception.JSXException;
+import it.jsx.exception.JSXLockException;
 import it.jsx.exception.XMLException;
 
 public class JSX {
-	private static JSX xmlManagerAS;
+	private String pathFile;
+	private Document document;
+	private int indentAmount = 4;
+	private boolean lock = false;
+	private boolean autoFlush = false;
+	private boolean validating = false;
+	private boolean namespaceAware = false;
+	private boolean featValidation = false;
+	private boolean featNamespaces = false;
+	private boolean featLoadDTDGramm = false;
+	private boolean featLoadExtDTD = false;
+	private final ReentrantLock reentrantLock = new ReentrantLock();
 	private final WriterXML writerXML = new WriterXML();
 	private final ReaderXML readerXML = new ReaderXML();
 
-	private JSX() {
+	/* costruttori */
+	public JSX() {
+	}
+	public JSX(String pathFile) throws XMLException, JSXLockException {
+		this.pathFile = pathFile;
+		loadDocument();
+	}
+	public JSX(Document document) {
+		this.document = document;
+		writerXML.setDocument(document);
+		readerXML.setDocument(document);
 	}
 
-	/* singleton */
-	public static JSX getInstance() {
-		return (xmlManagerAS = (xmlManagerAS == null) ? new JSX() : xmlManagerAS);
+	/* get e set */
+	public ReentrantLock getReentrantLock() {
+		return reentrantLock;
 	}
-	
+	public String getPathFile() {
+		return pathFile;
+	}
+	public Document getDocument() {
+		return document;
+	}
+	public void setDocument(Document document) {
+		this.document = document;
+		writerXML.setDocument(document);
+		readerXML.setDocument(document);
+	}
+	public boolean isLock() {
+		return lock;
+	}
+	public void setLock(boolean lock) {
+		this.lock = lock;
+	}
+	public int getIndentAmount() {
+		return indentAmount;
+	}
+	public void setIndentAmount(int indentAmount) {
+		this.indentAmount = indentAmount;
+	}
+	public boolean isAutoFlush() {
+		return autoFlush;
+	}
+	public void setAutoFlush(boolean autoFlush) {
+		this.autoFlush = autoFlush;
+	}
+	public boolean isValidating() {
+		return validating;
+	}
+	public void setValidating(boolean validating) {
+		this.validating = validating;
+	}
+	public boolean isNamespaceAware() {
+		return namespaceAware;
+	}
+	public void setNamespaceAware(boolean namespaceAware) {
+		this.namespaceAware = namespaceAware;
+	}
+	public boolean isFeatValidation() {
+		return featValidation;
+	}
+	public void setFeatValidation(boolean featValidation) {
+		this.featValidation = featValidation;
+	}
+	public boolean isFeatNamespaces() {
+		return featNamespaces;
+	}
+	public void setFeatNamespaces(boolean featNamespaces) {
+		this.featNamespaces = featNamespaces;
+	}
+	public boolean isFeatLoadDTDGramm() {
+		return featLoadDTDGramm;
+	}
+	public void setFeatLoadDTDGramm(boolean featLoadDTDGramm) {
+		this.featLoadDTDGramm = featLoadDTDGramm;
+	}
+	public boolean isFeatLoadExtDTD() {
+		return featLoadExtDTD;
+	}
+	public void setFeatLoadExtDTD(boolean featLoadExtDTD) {
+		this.featLoadExtDTD = featLoadExtDTD;
+	}
+	public void setPathFile(String pathFile) {
+		this.pathFile = pathFile;
+	}
 	/**
 	 * 
-	 * @param pathFileName
+	 * @param pathFile
 	 * path del file da cui creare il Document
 	 * @return org.w3c.dom.Docuement
 	 * oggetto che rappresenta documento xml 
 	 * @throws XMLException
 	 * eccezione sollevata se la creazione dell'oggetto Document ritorna errori
 	 */
-	/* metodo che restituisce il doc */
-	public Document getDocument(String pathFileName) throws XMLException {
+	public static Document createDocument(String pathFile, boolean validating, boolean namespaceAware,
+					boolean featValidation, boolean featNamespaces, boolean featLoadDTDGramm, boolean featLoadExtDTD) throws XMLException {
 		try {
 			DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
 			
-			docFactory.setValidating(false);
-			docFactory.setNamespaceAware(false);
-			docFactory.setFeature("http://xml.org/sax/features/namespaces", false);
-			docFactory.setFeature("http://xml.org/sax/features/validation", false);
-			docFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-dtd-grammar", false);
-			docFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+			docFactory.setValidating(validating);
+			docFactory.setNamespaceAware(namespaceAware);
+			docFactory.setFeature("http://xml.org/sax/features/validation", featValidation);
+			docFactory.setFeature("http://xml.org/sax/features/namespaces", featNamespaces);
+			docFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-dtd-grammar", featLoadDTDGramm);
+			docFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", featLoadExtDTD);
 
 			DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
-			return docBuilder.parse(pathFileName);
+			return docBuilder.parse(pathFile);
 		} catch (ParserConfigurationException | SAXException | IOException e) {
 			throw new XMLException("Impossibile lavorare sul file XML.\n\t"
 										+ "Message error: " + e.getMessage());
 		}
 	}
+
+	/**
+	 * metodo che carica il doc
+	 * @throws XMLException
+	 * eccezione sollevata se la creazione dell'oggetto Document ritorna errori
+	 * @throws JSXLockException 
+	 */
+	public void loadDocument() throws XMLException, JSXLockException {
+		if (lock) {
+			try {
+				if(!reentrantLock.tryLock(30, TimeUnit.SECONDS)) throw new JSXLockException("Error Timeout Reentrant Lock");
+			} catch (InterruptedException e) {
+				return;
+			}
+		}
+		document = createDocument(pathFile, validating, namespaceAware, featValidation, featNamespaces, featLoadDTDGramm, featLoadExtDTD);
+		writerXML.setDocument(document);
+		readerXML.setDocument(document);
+		if (lock) reentrantLock.unlock();
+	}
 	
 	/**
 	 * 
-	 * @param pathFileName
-	 * path file su cui aggiungere gli elementi
 	 * @param nameElement
 	 * nome elemento da aggiungere
 	 * @param mapAttributes
@@ -83,20 +192,26 @@ public class JSX {
 	 * @param mapAttributesChild
 	 * mappa attributi degli elementi figli, da impostare con &lt;nome_elemento, &lt;chiave, valore&gt;&gt;
 	 * @throws XMLException
-	 * eccezione sollevata se la creazione dell'oggetto Document ritorna errori
+	 * eccezione sollevata se il flush e' true e ritorna errori
+	 * @throws JSXLockException
 	 */
 	/* metodo che aggiunge elementi con child e mappe per attributi e scrive su pathFile */
-	public void addElementWithChild(String pathFileName, String nameElement, HashMap<String, String> mapAttributes, HashMap<String, String> mapChildNode,
-										HashMap<String, HashMap<String, String>> mapAttributesChild) throws XMLException {
-		Document doc = getDocument(pathFileName);
-		writerXML.addElementWithChild(doc, nameElement, mapAttributes, mapChildNode, mapAttributesChild);
-		flush(doc, pathFileName, 4);
+	public void addElementWithChild(String nameElement, HashMap<String, String> mapAttributes, HashMap<String, String> mapChildNode,
+										HashMap<String, HashMap<String, String>> mapAttributesChild) throws XMLException, JSXLockException {
+		if (lock) {
+			try {
+				if(!reentrantLock.tryLock(30, TimeUnit.SECONDS)) throw new JSXLockException("Error Timeout Reentrant Lock");
+			} catch (InterruptedException e) {
+				return;
+			}
+		}
+		writerXML.addElementWithChild(nameElement, mapAttributes, mapChildNode, mapAttributesChild);
+		if (autoFlush) flush(pathFile, true);
+		if (lock) reentrantLock.unlock();
 	}
 
 	/**
 	 * 
-	 * @param pathFileName
-	 * path file su cui aggiungere gli elementi
 	 * @param nameElement
 	 * nome elemento da aggiungere
 	 * @param idElement
@@ -106,118 +221,74 @@ public class JSX {
 	 * @param mapIdChild
 	 * mappa id elementi figli del nuovo elemento, da impostare con &lt;nome_elemento, id&gt;
 	 * @throws XMLException
-	 * eccezione sollevata se la creazione dell'oggetto Document ritorna errori
+	 * eccezione sollevata se il flush e' true e ritorna errori
+	 * @throws JSXLockException 
 	 */
 	/* metodo che aggiunge elementi con child, setta attributo id e scrive su pathFile */
-	public void addElementWithChild(String pathFileName, String nameElement, String idElement, HashMap<String, String> mapChildNode,
-										HashMap<String, String> mapIdChild) throws XMLException {
-		Document doc = getDocument(pathFileName);
-		writerXML.addElementWithChild(doc, nameElement, idElement, mapChildNode, mapIdChild);
-		flush(doc, pathFileName, 4);
+	public void addElementWithChild(String nameElement, String idElement, HashMap<String, String> mapChildNode,
+										HashMap<String, String> mapIdChild) throws XMLException, JSXLockException {
+		if (lock) {
+			try {
+				if(!reentrantLock.tryLock(30, TimeUnit.SECONDS)) throw new JSXLockException("Error Timeout Reentrant Lock");
+			} catch (InterruptedException e) {
+				return;
+			}
+		}
+		writerXML.addElementWithChild(nameElement, idElement, mapChildNode, mapIdChild);
+		if (autoFlush) flush(pathFile, true);
+		if (lock) reentrantLock.unlock();
 	}
 
-	/**
-	 * 
-	 * @param doc
-	 * documento che rappresenta l'xml
-	 * @param nameElement
-	 * nome elemento da aggiungere
-	 * @param mapAttributes
-	 * mappa attributi da inserire sul nuovo elemento, da impostare con &lt;chiave, valore&gt;
-	 * @param mapChildNode
-	 * mappa elementi figli del nuovo elemento, da impostare con &lt;nome_elemento, test_interno_tag&gt;
-	 * @param mapAttributesChild
-	 * mappa attributi degli elementi figli, da impostare con &lt;nome_elemento, &lt;chiave, valore&gt;&gt;
-	 */
-	/* metodo che aggiunge elementi con child e mappe per attributi e scrive su Document */
-	public void addElementWithChild(Document doc, String nameElement, HashMap<String, String> mapAttributes, HashMap<String, String> mapChildNode,
-										HashMap<String, HashMap<String, String>> mapAttributesChild) {
-		writerXML.addElementWithChild(doc, nameElement, mapAttributes, mapChildNode, mapAttributesChild);
-	}
-
-	/**
-	 * 
-	 * @param doc
-	 * documento che rappresenta l'xml
-	 * @param nameElement
-	 * nome elemento da aggiungere
-	 * @param idElement
-	 * id da dare all'elemento
-	 * @param mapChildNode
-	 * mappa elementi figli del nuovo elemento, da impostare con &lt;nome_elemento, test_interno_tag&gt;
-	 * @param mapIdChild
-	 * mappa id elementi figli del nuovo elemento, da impostare con &lt;nome_elemento, id&gt;
-	 */
-	/* metodo che aggiunge elementi con child, setta attributo id e scrive su Document */
-	public void addElementWithChild(Document doc, String nameElement, String idElement, HashMap<String, String> mapChildNode,
-										HashMap<String, String> mapIdChild) {
-		writerXML.addElementWithChild(doc, nameElement, idElement, mapChildNode, mapIdChild);
-	}
 	
 	/**
 	 * 
-	 * @param pathFileName
-	 * path file su cui aggiungere gli elementi
 	 * @param nameElement
 	 * nome elemento da aggiungere
 	 * @param mapAttributes
 	 * mappa attributi da inserire sul nuovo elemento, da impostare con &lt;chiave, valore&gt;
 	 * @throws XMLException
-	 * eccezione sollevata se la creazione dell'oggetto Document ritorna errori
+	 * eccezione sollevata se il flush e' true e ritorna errori
+	 * @throws JSXLockException 
 	 */
 	/* metodo che aggiunge un elemento al firstchild con mappa attributi su pathFileName */
-	public void addElement(String pathFileName, String nameElement, HashMap<String, String> mapAttributes) throws XMLException {
-		Document doc = getDocument(pathFileName);
-		writerXML.addElement(doc, nameElement, mapAttributes);
-		flush(doc, pathFileName, 4);
+	public void addElement(String nameElement, HashMap<String, String> mapAttributes) throws XMLException, JSXLockException {
+		if (lock) {
+			try {
+				if(!reentrantLock.tryLock(30, TimeUnit.SECONDS)) throw new JSXLockException("Error Timeout Reentrant Lock");
+			} catch (InterruptedException e) {
+				return;
+			}
+		}
+		writerXML.addElement(nameElement, mapAttributes);
+		if (autoFlush) flush(pathFile, true);
+		if (lock) reentrantLock.unlock();
 	}
 	
 	/**
 	 * 
-	 * @param pathFileName
-	 * path file su cui aggiungere gli elementi
 	 * @param nameElement
 	 * nome elemento da aggiungere
 	 * @param idElement
 	 * id da dare all'elemento
 	 * @throws XMLException
-	 * eccezione sollevata se la creazione dell'oggetto Document ritorna errori
+	 * eccezione sollevata se il flush e' true e ritorna errori
+	 * @throws JSXLockException 
 	 */
 	/* metodo che aggiunge un elemento al firstchild con attributo id su pathFileName */
-	public void addElement(String pathFileName, String nameElement, String idElement) throws XMLException {
-		Document doc = getDocument(pathFileName);
-		writerXML.addElement(doc, nameElement, idElement);
-		flush(doc, pathFileName, 4);
+	public void addElement(String nameElement, String idElement) throws XMLException, JSXLockException {
+		if (lock) {
+			try {
+				if(!reentrantLock.tryLock(30, TimeUnit.SECONDS)) throw new JSXLockException("Error Timeout Reentrant Lock");
+			} catch (InterruptedException e) {
+				return;
+			}
+		}
+		writerXML.addElement(nameElement, idElement);
+		if (autoFlush) flush(pathFile, true);
+		if (lock) reentrantLock.unlock();
 	}
 	
-	/**
-	 * 
-	 * @param doc
-	 * documento che rappresenta l'xml
-	 * @param nameElement
-	 * nome elemento da aggiungere
-	 * @param mapAttributes
-	 * mappa attributi da inserire sul nuovo elemento, da impostare con &lt;chiave, valore&gt;
-	 */
-	/* metodo che aggiunge un elemento al firstchild con mappa attributi su Document */
-	public void addElement(Document doc, String nameElement, HashMap<String, String> mapAttributes) {
-		writerXML.addElement(doc, nameElement, mapAttributes);
-	}
 	
-	/**
-	 * 
-	 * @param doc
-	 * documento che rappresenta l'xml
-	 * @param nameElement
-	 * nome elemento da aggiungere
-	 * @param idElement
-	 * id da dare all'elemento
-	 */
-	/* metodo che aggiunge un elemento al firstchild con attributo id su Document */
-	public void addElement(Document doc, String nameElement, String idElement) {
-		writerXML.addElement(doc, nameElement, idElement);
-	}
-
 	/**
 	 * 
 	 * @param parentNode
@@ -251,8 +322,6 @@ public class JSX {
 	}
 
 	/**
-	 * @param pathFileName
-	 * path file su cui aggiungere gli elementi
 	 * @param nameElement
 	 * nome elemento da aggiungere
 	 * @param mapAttributes
@@ -260,19 +329,25 @@ public class JSX {
 	 * @param mapChildNode
 	 * mappa elementi figli del nuovo elemento, da impostare con &lt;nome_elemento, test_interno_tag&gt;
 	 * @throws XMLException
-	 * eccezione sollevata se la creazione dell'oggetto Document ritorna errori
+	 * eccezione sollevata se il flush e' true e ritorna errori
+	 * @throws JSXLockException 
 	 */
 	/* metodo che aggiunge elementi con child e mappe per attributi e scrive su pathFile */
-	public void addElementWithChild(String pathFileName, String nameElement, HashMap<String, String> mapAttributes, HashMap<String, String> mapChildNode) throws XMLException {
-		Document doc = getDocument(pathFileName);
-		writerXML.addElementWithChild(doc, nameElement, mapAttributes, mapChildNode);
-		flush(doc, pathFileName, 4);
+	public void addElementWithChild(String nameElement, HashMap<String, String> mapAttributes, HashMap<String, String> mapChildNode) throws XMLException, JSXLockException {
+		if (lock) {
+			try {
+				if(!reentrantLock.tryLock(30, TimeUnit.SECONDS)) throw new JSXLockException("Error Timeout Reentrant Lock");
+			} catch (InterruptedException e) {
+				return;
+			}
+		}
+		writerXML.addElementWithChild(nameElement, mapAttributes, mapChildNode);
+		if (autoFlush) flush(pathFile, true);
+		if (lock) reentrantLock.unlock();
 	}
 
 	/**
 	 * 
-	 * @param pathFileName
-	 * path file su cui aggiungere gli elementi
 	 * @param nameElement
 	 * nome elemento da aggiungere
 	 * @param idElement
@@ -280,107 +355,69 @@ public class JSX {
 	 * @param mapChildNode
 	 * mappa elementi figli del nuovo elemento, da impostare con &lt;nome_elemento, test_interno_tag&gt;
 	 * @throws XMLException
-	 * eccezione sollevata se la creazione dell'oggetto Document ritorna error
-	 */
-	/* metodo che aggiunge elementi con child, setta attributo id e scrive su pathFile */
-	public void addElementWithChild(String pathFileName, String nameElement, String idElement, HashMap<String, String> mapChildNode) throws XMLException {
-		Document doc = getDocument(pathFileName);
-		writerXML.addElementWithChild(doc, nameElement, idElement, mapChildNode);
-		flush(doc, pathFileName, 4);
-	}
-
-	/**
-	 * 
-	 * @param doc
-	 * documento che rappresenta l'xml
-	 * @param nameElement
-	 * nome elemento da aggiungere
-	 * @param mapAttributes
-	 * mappa attributi da inserire sul nuovo elemento, da impostare con &lt;chiave, valore&gt;
-	 * @param mapChildNode
-	 * mappa elementi figli del nuovo elemento, da impostare con &lt;nome_elemento, test_interno_tag&gt;
-	 */
-	/* metodo che aggiunge elementi con child e mappe per attributi e scrive su Document */
-	public void addElementWithChild(Document doc, String nameElement, HashMap<String, String> mapAttributes, HashMap<String, String> mapChildNode) {
-		writerXML.addElementWithChild(doc, nameElement, mapAttributes, mapChildNode);
-	}
-
-
-	/**
-	 * 
-	 * @param doc
-	 * documento che rappresenta l'xml
-	 * @param nameElement
-	 * nome elemento da aggiungere
-	 * @param idElement
-	 * id da dare all'elemento
-	 * @param mapChildNode
-	 * mappa elementi figli del nuovo elemento, da impostare con &lt;nome_elemento, test_interno_tag&gt;
+	 * eccezione sollevata se il flush e' true e ritorna errori
+	 * @throws JSXLockException 
 	 */
 	/* metodo che aggiunge elementi con child, setta attributo id e scrive su Document */
-	public void addElementWithChild(Document doc, String nameElement, String idElement, HashMap<String, String> mapChildNode) {
-		writerXML.addElementWithChild(doc, nameElement, idElement, mapChildNode);
+	public void addElementWithChild(String nameElement, String idElement, HashMap<String, String> mapChildNode) throws XMLException, JSXLockException {
+		if (lock) {
+			try {
+				if(!reentrantLock.tryLock(30, TimeUnit.SECONDS)) throw new JSXLockException("Error Timeout Reentrant Lock");
+			} catch (InterruptedException e) {
+				return;
+			}
+		}
+		writerXML.addElementWithChild(nameElement, idElement, mapChildNode);
+		if (autoFlush) flush(pathFile, true);
+		if (lock) reentrantLock.unlock();
 	}
 	
 	/**
 	 * 
-	 * @param pathFileName
-	 * path file su cui aggiungere gli elementi
 	 * @param nameElement
 	 * nome elemento da aggiungere
 	 * @throws XMLException
-	 * eccezione sollevata se la creazione dell'oggetto Document ritorna error
+	 * eccezione sollevata se il flush e' true e ritorna errori
+	 * @throws JSXLockException 
 	 */
 	/* metodo che aggiunge un elemento al firstchild con mappa attributi su pathFileName */
-	public void addElement(String pathFileName, String nameElement) throws XMLException {
-		Document doc = getDocument(pathFileName);
-		writerXML.addElement(doc, nameElement);
-		flush(doc, pathFileName, 4);
+	public void addElement(String nameElement) throws XMLException, JSXLockException {
+		if (lock) {
+			try {
+				if(!reentrantLock.tryLock(30, TimeUnit.SECONDS)) throw new JSXLockException("Error Timeout Reentrant Lock");
+			} catch (InterruptedException e) {
+				return;
+			}
+		}
+		writerXML.addElement(nameElement);
+		if (autoFlush) flush(pathFile, true);
+		if (lock) reentrantLock.unlock();
 	}
 	
 	/**
 	 * 
-	 * @param pathFileName
-	 * path file su cui aggiungere gli elementi
 	 * @param nameElement
 	 * nome elemento da aggiungere
 	 * @param textContent
 	 * testo da inserire all'interno del nuovo elemento
 	 * @throws XMLException
-	 * eccezione sollevata se la creazione dell'oggetto Document ritorna error
+	 * eccezione sollevata se il flush e' true e ritorna errori
+	 * @throws JSXLockException 
 	 */
 	/* metodo che aggiunge un elemento al firstchild con attributo id su pathFileName */
-	public void addElementText(String pathFileName, String nameElement, String textContent) throws XMLException {
-		Document doc = getDocument(pathFileName);
-		writerXML.addElementText(doc, nameElement, textContent);
-		flush(doc, pathFileName, 4);
+	public void addElementText(String nameElement, String textContent) throws XMLException, JSXLockException {
+		if (lock) {
+			try {
+				if(!reentrantLock.tryLock(30, TimeUnit.SECONDS)) throw new JSXLockException("Error Timeout Reentrant Lock");
+			} catch (InterruptedException e) {
+				return;
+			}
+		}
+		writerXML.addElementText(nameElement, textContent);
+		if (autoFlush) flush(pathFile, true);
+		if (lock) reentrantLock.unlock();
 	}
 	
-	/**
-	 * 
-	 * @param doc
-	 * documento che rappresenta l'xml
-	 * @param nameElement
-	 * nome elemento da aggiungere
-	 */
-	/* metodo che aggiunge un elemento al firstchild con mappa attributi su Document */
-	public void addElement(Document doc, String nameElement) {
-		writerXML.addElement(doc, nameElement);
-	}
-	
-	/**
-	 * 
-	 * @param doc
-	 * documento che rappresenta l'xml
-	 * @param nameElement
-	 * nome elemento da aggiungere
-	 * @param textContent
-	 * testo da inserire all'interno del nuovo elemento
-	 */
-	/* metodo che aggiunge un elemento al firstchild con attributo id su Document */
-	public void addElementText(Document doc, String nameElement, String textContent) {
-		writerXML.addElementText(doc, nameElement, textContent);
-	}
 
 	/**
 	 * 
@@ -399,81 +436,72 @@ public class JSX {
 	
 	/**
 	 * 
-	 * @param pathFileName
-	 * path file xml
 	 * @param nameElements
 	 * nome elementi da inserire nella lista
 	 * @return ArrayList&lt;Node&gt;
 	 * lista di nodi
-	 * @throws XMLException
-	 * eccezione sollevata se la creazione dell'oggetto Document ritorna error
+	 * @throws JSXLockException 
 	 */
 	/* metodo che ritorna lista di elementi con filtro nome */
-	public ArrayList<Node> getArrayElements(String pathFileName, String nameElements) throws XMLException {
-		Document doc = getDocument(pathFileName);
-		return readerXML.getArrayElements(doc, nameElements);
+	public ArrayList<Node> getArrayElements(String nameElements) throws JSXLockException {
+		if (lock) {
+			try {
+				if(!reentrantLock.tryLock(30, TimeUnit.SECONDS)) throw new JSXLockException("Error Timeout Reentrant Lock");
+			} catch (InterruptedException e) {
+				return null;
+			}
+		}
+		ArrayList<Node> nodeList = readerXML.getArrayElements(nameElements);
+		if (lock) reentrantLock.unlock();
+		return nodeList;
 	}
 
 	/**
 	 * 
-	 * @param pathFileName
-	 * path file xml
 	 * @param nameElements
 	 * nome elementi da inserire nella lista
 	 * @return HashMap&lt;String, Node&gt;
 	 * mappa con &lt;id, nodo&gt;
-	 * @throws XMLException
-	 * eccezione sollevata se la creazione dell'oggetto Document ritorna error
+	 * @throws JSXLockException 
 	 * 
 	 */
-	public HashMap<String, Node> getMapIdElement(String pathFileName, String nameElements) throws XMLException {
-		Document doc = getDocument(pathFileName);
-		return readerXML.getMapIdElement(doc, nameElements);
+	public HashMap<String, Node> getMapIdElement(String nameElements) throws JSXLockException {
+		if (lock) {
+			try {
+				if(!reentrantLock.tryLock(30, TimeUnit.SECONDS)) throw new JSXLockException("Error Timeout Reentrant Lock");
+			} catch (InterruptedException e) {
+				return null;
+			}
+		}
+		HashMap<String, Node> nodeMap = readerXML.getMapIdElement(nameElements);
+		if (lock) reentrantLock.unlock();
+		return nodeMap;
 	}
 
 	/**
 	 * 
-	 * @param doc
-	 * documento che rappresenta l'xml
-	 * @param nameElements
-	 * nome elementi da inserire nella lista
-	 * @return ArrayList&lt;Node&gt;
-	 * lista di nodi
-	 */
-	/* metodo che ritorna lista di elementi con filtro nome */
-	public ArrayList<Node> getArrayElements(Document doc, String nameElements) {
-		return readerXML.getArrayElements(doc, nameElements);
-	}
-
-	/**
-	 * 
-	 * @param doc
-	 * documento che rappresenta l'xml
 	 * @param nameElements
 	 * nome elementi da cercare
 	 * @param idElement
 	 * id elemento da cercare
 	 * @return Node
 	 * primo nodo trovate con nome e id passati in ingresso
+	 * @throws JSXLockException 
 	 */
 	/* metodo che ritorna lista di elementi con filtro nome e id */
-	public Node getElementById(Document doc, String nameElement, String idElement) {
-		return readerXML.getElementById(doc, nameElement, idElement);
+	public Node getElementById(String nameElement, String idElement) throws JSXLockException {
+		if (lock) {
+			try {
+				if(!reentrantLock.tryLock(30, TimeUnit.SECONDS)) throw new JSXLockException("Error Timeout Reentrant Lock");
+			} catch (InterruptedException e) {
+				return null;
+			}
+		}
+		Node node = readerXML.getElementById(nameElement, idElement);
+		if (lock) reentrantLock.unlock();
+		return node;
 	}
 
-	/**
-	 * 
-	 * @param doc
-	 * documento che rappresenta l'xml
-	 * @param nameElements
-	 * nome elementi da cercare
-	 * @return HashMap&lt;String, Node&gt;
-	 * mappa con &lt;id, nodo&gt;
-	 */
-	/* metodo che ritorna mappa di nodi con key id */
-	public HashMap<String, Node> getMapIdElement (Document doc, String nameElements) {
-		return readerXML.getMapIdElement(doc, nameElements);
-	}
 
 	/**
 	 * 
@@ -533,31 +561,24 @@ public class JSX {
 	
 	/**
 	 * 
-	 * @param pathFileName
-	 * path file xml
 	 * @param nameElement
 	 * nome elemento da eliminare
 	 * @param id
 	 * id elemento da eliminare
 	 * @throws XMLException
+	 * eccezione sollevata se il flush e' true e ritorna errori
+	 * @throws JSXLockException 
 	 */
-	public void deleteNode(String pathFileName, String nameElement, String id) throws XMLException {
-		Document doc = getDocument(pathFileName);
-		writerXML.deleteNode(doc, nameElement, id);
-		flush(doc, pathFileName, 4);
-	}
-
-	/**
-	 * 
-	 * @param doc
-	 * documento che rappresenta l'xml
-	 * @param nameElement
-	 * nome elemento da eliminare
-	 * @param id
-	 * id elemento da eliminare
-	 */
-	public void deleteNode(Document doc, String nameElement, String id) {
-		writerXML.deleteNode(doc, nameElement, id);
+	public void deleteNode(String nameElement, String id) throws XMLException, JSXLockException {
+		if (lock) {
+			try {
+				if(!reentrantLock.tryLock(30, TimeUnit.SECONDS)) throw new JSXLockException("Error Timeout Reentrant Lock");
+			} catch (InterruptedException e) {
+			}
+		}
+		writerXML.deleteNode(nameElement, id);
+		if (autoFlush) flush(pathFile, true);
+		if (lock) reentrantLock.unlock();
 	}
 
 	/**
@@ -577,7 +598,7 @@ public class JSX {
 	 * id piu' grande di tutti quelli passati nel set
 	 */
 	/* metodo che torna l'id piu'grande da un set id */
-	public int getGreatId(Set<String> setId) {
+	public static int getGreatId(Set<String> setId) {
 		int greatId = Integer.MIN_VALUE;
 		for (String id : setId)
 			greatId = (Long.parseLong(id) > greatId) ? Integer.parseInt(id) : greatId; 
@@ -585,12 +606,18 @@ public class JSX {
 		return greatId;
 	}
 
-
-	protected void removeBlankLines(Document doc) throws JSXException {
+	/**
+	 * metodo che elimina le righe bianche dal document
+	 * @param document
+	 * oggetto documento a cui si vogliono eliminare le righe vuote
+	 * @throws JSXException
+	 * eccezione sollevata se la rimozione delle linee vuote ritorna errori
+	 */
+	public static void removeBlankLines(Document document) throws JSXException {
 		try {
 			XPath xp = XPathFactory.newInstance().newXPath();
 			NodeList nl;
-			nl = (NodeList) xp.evaluate("//text()[normalize-space(.)='']", doc, XPathConstants.NODESET);
+			nl = (NodeList) xp.evaluate("//text()[normalize-space(.)='']", document, XPathConstants.NODESET);
 			
 			for (int i=0; i < nl.getLength(); ++i) {
 				Node node = nl.item(i);
@@ -603,30 +630,48 @@ public class JSX {
 	}
 
 	/**
+	 * metodo che elimina le righe bianche dal document
+	 * @throws JSXException
+	 * eccezione sollevata se la rimozione delle linee vuote ritorna errori
+	 */
+	public void removeBlankLines() throws JSXException {
+		removeBlankLines(document);
+	}
+
+	/**
 	 * 
-	 * @param doc
-	 * documento che rappresenta l'xml
 	 * @param filePath
 	 * path in cui salvare l'xml
 	 * @throws XMLException
 	 * eccezione sollevata se il salvataggio del file xml ritorna erroriS
+	 * @throws JSXLockException 
 	 */
 	/* salva modifiche nel file xml */
-	public void flush(Document doc, String filePath, int indentAmount) throws XMLException {
+	public void flush(String pathFile, boolean reloadDocument) throws XMLException, JSXLockException {
+		if (lock) {
+			try {
+				if(!reentrantLock.tryLock(30, TimeUnit.SECONDS)) throw new JSXLockException("Error Timeout Reentrant Lock");
+			} catch (InterruptedException e) {
+			}
+		}
 		try {
-			removeBlankLines(doc);
 			TransformerFactory transformerFactory = TransformerFactory.newInstance();
 			Transformer transformer = transformerFactory.newTransformer();
 			if (indentAmount > 0) {
+				removeBlankLines();
 				transformer.setOutputProperty(OutputKeys.INDENT, "yes");
 				transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", String.valueOf(indentAmount));
 			}
-			DOMSource source = new DOMSource(doc);
-			StreamResult result = new StreamResult(new File(filePath));
+			DOMSource source = new DOMSource(document);
+			StreamResult result = new StreamResult(new File(pathFile));
 			transformer.transform(source, result);
+			if (reloadDocument)
+				loadDocument();
 		} catch (TransformerException | JSXException e) {
 			throw new XMLException("Impossibile lavorare sul file XML.\n\t"
 										+ "Message error: " + e.getMessage());
+		} finally {
+			if (lock) reentrantLock.unlock();
 		}
 
 	}
