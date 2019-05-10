@@ -8,9 +8,20 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 public class ReaderXML {
+	private Document document;
 
+	/* costruttore */
 	protected ReaderXML() {
 	}
+
+	/* get e set */
+	public Document getDocument() {
+		return document;
+	}
+	public void setDocument(Document document) {
+		this.document = document;
+	}
+
 
 	/**
 	 * 
@@ -19,9 +30,9 @@ public class ReaderXML {
 	 * @return
 	 */
 	/* metodo che ritorna lista di elementi con filtro nome */
-	protected ArrayList<Node> getArrayElements(Document doc, String nameElements) {
+	protected ArrayList<Node> getArrayElements(String nameElements) {
 		ArrayList<Node> listElements = new ArrayList<Node>();
-		NodeList nodeList = doc.getElementsByTagName(nameElements);
+		NodeList nodeList = document.getElementsByTagName(nameElements);
 		for (int i = 0; i < nodeList.getLength(); i++)			
 			listElements.add(nodeList.item(i));
 		return listElements;
@@ -29,14 +40,14 @@ public class ReaderXML {
 
 	/**
 	 * 
-	 * @param doc
+	 * @param document
 	 * @param nameElement
 	 * @param idElement
 	 * @return
 	 */
 	/* metodo che ritorna lista di elementi con filtro nome e id */
-	protected Node getElementById(Document doc, String nameElement, String idElement) {
-		ArrayList<Node> listElements = getArrayElements(doc, nameElement);
+	protected Node getElementById(String nameElement, String idElement) {
+		ArrayList<Node> listElements = getArrayElements(nameElement);
 		for (Node node : listElements)
 			if (node.getNodeName().equals(nameElement) &&
 							node.getAttributes().getNamedItem("id").getTextContent().equals(idElement))
@@ -47,14 +58,14 @@ public class ReaderXML {
 
 	/**
 	 * 
-	 * @param doc
+	 * @param document
 	 * @param nameElements
 	 * @return
 	 */
 	/* metodo che ritorna mappa di nodi con key id */
-	protected HashMap<String, Node> getMapIdElement (Document doc, String nameElements) {
+	protected HashMap<String, Node> getMapIdElement(String nameElements) {
 		HashMap<String, Node> mapElement = new HashMap<String, Node>();
-		ArrayList<Node> listElement = getArrayElements(doc, nameElements);
+		ArrayList<Node> listElement = getArrayElements(nameElements);
 		for (Node node : listElement)
 			mapElement.put(node.getAttributes().getNamedItem("id").getTextContent(), node);
 		
