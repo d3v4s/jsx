@@ -206,8 +206,8 @@ public class JSX {
 			}
 		}
 		writerXML.addElementWithChild(nameElement, mapAttributes, mapChildNode, mapAttributesChild);
-		if (autoFlush) flush(pathFile, true);
 		if (lock) reentrantLock.unlock();
+		if (autoFlush) flush(pathFile, true);
 	}
 
 	/**
@@ -235,8 +235,8 @@ public class JSX {
 			}
 		}
 		writerXML.addElementWithChild(nameElement, idElement, mapChildNode, mapIdChild);
-		if (autoFlush) flush(pathFile, true);
 		if (lock) reentrantLock.unlock();
+		if (autoFlush) flush(pathFile, true);
 	}
 
 	
@@ -260,8 +260,8 @@ public class JSX {
 			}
 		}
 		writerXML.addElement(nameElement, mapAttributes);
-		if (autoFlush) flush(pathFile, true);
 		if (lock) reentrantLock.unlock();
+		if (autoFlush) flush(pathFile, true);
 	}
 	
 	/**
@@ -284,8 +284,8 @@ public class JSX {
 			}
 		}
 		writerXML.addElement(nameElement, idElement);
-		if (autoFlush) flush(pathFile, true);
 		if (lock) reentrantLock.unlock();
+		if (autoFlush) flush(pathFile, true);
 	}
 	
 	
@@ -342,8 +342,8 @@ public class JSX {
 			}
 		}
 		writerXML.addElementWithChild(nameElement, mapAttributes, mapChildNode);
-		if (autoFlush) flush(pathFile, true);
 		if (lock) reentrantLock.unlock();
+		if (autoFlush) flush(pathFile, true);
 	}
 
 	/**
@@ -368,8 +368,8 @@ public class JSX {
 			}
 		}
 		writerXML.addElementWithChild(nameElement, idElement, mapChildNode);
-		if (autoFlush) flush(pathFile, true);
 		if (lock) reentrantLock.unlock();
+		if (autoFlush) flush(pathFile, true);
 	}
 	
 	/**
@@ -390,8 +390,8 @@ public class JSX {
 			}
 		}
 		writerXML.addElement(nameElement);
-		if (autoFlush) flush(pathFile, true);
 		if (lock) reentrantLock.unlock();
+		if (autoFlush) flush(pathFile, true);
 	}
 	
 	/**
@@ -414,8 +414,8 @@ public class JSX {
 			}
 		}
 		writerXML.addElementText(nameElement, textContent);
-		if (autoFlush) flush(pathFile, true);
 		if (lock) reentrantLock.unlock();
+		if (autoFlush) flush(pathFile, true);
 	}
 	
 
@@ -577,8 +577,8 @@ public class JSX {
 			}
 		}
 		writerXML.deleteNode(nameElement, id);
-		if (autoFlush) flush(pathFile, true);
 		if (lock) reentrantLock.unlock();
+		if (autoFlush) flush(pathFile, true);
 	}
 
 	/**
@@ -652,6 +652,7 @@ public class JSX {
 			try {
 				if(!reentrantLock.tryLock(30, TimeUnit.SECONDS)) throw new JSXLockException("Error Timeout Reentrant Lock");
 			} catch (InterruptedException e) {
+				return;
 			}
 		}
 		try {
