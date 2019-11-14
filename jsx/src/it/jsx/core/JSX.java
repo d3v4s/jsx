@@ -31,8 +31,13 @@ import it.jsx.exception.JSXException;
 import it.jsx.exception.JSXLockException;
 import it.jsx.exception.XMLException;
 
+/**
+ * Class for parser, create and change a XLM file 
+ * @author Andrea Serra
+ *
+ */
 public class JSX {
-	private String pathFile;
+	private String filePath;
 	private Document document;
 	private int indentAmount = 4;
 	private boolean lock = false;
@@ -47,25 +52,47 @@ public class JSX {
 	private final WriterXML writerXML = new WriterXML();
 	private final ReaderXML readerXML = new ReaderXML();
 
-	/* costruttori */
+	/* ################################################################################# */
+	/* START CONSTRUCTORS */
+	/* ################################################################################# */
+
 	public JSX() {
 	}
-	public JSX(String pathFile) throws XMLException, JSXLockException {
-		this.pathFile = pathFile;
+
+	/**
+	 * constructor that set a file path
+	 * @param filePath of XML
+	 * @throws XMLException
+	 * @throws JSXLockException
+	 */
+	public JSX(String filePath) throws XMLException, JSXLockException {
+		this.filePath = filePath;
 		loadDocument();
 	}
+
+	/**
+	 * constructor that set a Document
+	 * @param document XML
+	 */
 	public JSX(Document document) {
 		this.document = document;
 		writerXML.setDocument(document);
 		readerXML.setDocument(document);
 	}
 
-	/* get e set */
+	/* ################################################################################# */
+	/* END CONSTRUCTORS */
+	/* ################################################################################# */
+
+	/* ################################################################################# */
+	/* START GET AND SET */
+	/* ################################################################################# */
+
 	public ReentrantLock getReentrantLock() {
 		return reentrantLock;
 	}
-	public String getPathFile() {
-		return pathFile;
+	public String getFilePath() {
+		return filePath;
 	}
 	public Document getDocument() {
 		return document;
@@ -129,11 +156,16 @@ public class JSX {
 	public void setFeatLoadExtDTD(boolean featLoadExtDTD) {
 		this.featLoadExtDTD = featLoadExtDTD;
 	}
-	public void setPathFile(String pathFile) {
-		this.pathFile = pathFile;
+	public void setFilePath(String filePath) {
+		this.filePath = filePath;
 	}
+
+	/* ################################################################################# */
+	/* END GET AND SET */
+	/* ################################################################################# */
+
 	/**
-	 * 
+	 * method that create a Document
 	 * @param pathFile
 	 * path del file da cui creare il Document
 	 * @return org.w3c.dom.Docuement
@@ -156,12 +188,13 @@ public class JSX {
 			DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
 			return docBuilder.parse(pathFile);
 		} catch (ParserConfigurationException | SAXException | IOException e) {
-			throw new XMLException("Impossibile lavorare sul file XML.\n\t"
-										+ "Message error: " + e.getMessage());
+			throw new XMLException("Unable to work on a XML file.\n\t"
+										+ "Error message: " + e.getMessage());
 		}
 	}
 
 	/**
+	 * method that load a Document
 	 * metodo che carica il doc
 	 * @throws XMLException
 	 * eccezione sollevata se la creazione dell'oggetto Document ritorna errori
@@ -170,19 +203,20 @@ public class JSX {
 	public void loadDocument() throws XMLException, JSXLockException {
 		if (lock) {
 			try {
-				if(!reentrantLock.tryLock(30, TimeUnit.SECONDS)) throw new JSXLockException("Error Timeout Reentrant Lock");
+				if (!reentrantLock.tryLock(30, TimeUnit.SECONDS)) throw new JSXLockException("Error Timeout Reentrant Lock");
 			} catch (InterruptedException e) {
 				return;
 			}
 		}
-		document = createDocument(pathFile, validating, namespaceAware, featValidation, featNamespaces, featLoadDTDGramm, featLoadExtDTD);
+		document = createDocument(filePath, validating, namespaceAware, featValidation, featNamespaces, featLoadDTDGramm, featLoadExtDTD);
 		writerXML.setDocument(document);
 		readerXML.setDocument(document);
 		if (lock) reentrantLock.unlock();
 	}
 	
+	/* metodo che aggiunge elementi con child e mappe per attributi e scrive su pathFile */
 	/**
-	 * 
+	 * method that add child element
 	 * @param nameElement
 	 * nome elemento da aggiungere
 	 * @param mapAttributes
@@ -195,23 +229,22 @@ public class JSX {
 	 * eccezione sollevata se il flush e' true e ritorna errori
 	 * @throws JSXLockException
 	 */
-	/* metodo che aggiunge elementi con child e mappe per attributi e scrive su pathFile */
 	public void addElementWithChild(String nameElement, HashMap<String, String> mapAttributes, HashMap<String, String> mapChildNode,
 										HashMap<String, HashMap<String, String>> mapAttributesChild) throws XMLException, JSXLockException {
 		if (lock) {
 			try {
-				if(!reentrantLock.tryLock(30, TimeUnit.SECONDS)) throw new JSXLockException("Error Timeout Reentrant Lock");
+				if (!reentrantLock.tryLock(30, TimeUnit.SECONDS)) throw new JSXLockException("Error Timeout Reentrant Lock");
 			} catch (InterruptedException e) {
 				return;
 			}
 		}
 		writerXML.addElementWithChild(nameElement, mapAttributes, mapChildNode, mapAttributesChild);
 		if (lock) reentrantLock.unlock();
-		if (autoFlush) flush(pathFile, true);
+		if (autoFlush) flush(filePath, true);
 	}
 
 	/**
-	 * 
+	 * method that add child element 
 	 * @param nameElement
 	 * nome elemento da aggiungere
 	 * @param idElement
@@ -229,19 +262,19 @@ public class JSX {
 										HashMap<String, String> mapIdChild) throws XMLException, JSXLockException {
 		if (lock) {
 			try {
-				if(!reentrantLock.tryLock(30, TimeUnit.SECONDS)) throw new JSXLockException("Error Timeout Reentrant Lock");
+				if (!reentrantLock.tryLock(30, TimeUnit.SECONDS)) throw new JSXLockException("Error Timeout Reentrant Lock");
 			} catch (InterruptedException e) {
 				return;
 			}
 		}
 		writerXML.addElementWithChild(nameElement, idElement, mapChildNode, mapIdChild);
 		if (lock) reentrantLock.unlock();
-		if (autoFlush) flush(pathFile, true);
+		if (autoFlush) flush(filePath, true);
 	}
 
 	
 	/**
-	 * 
+	 * method that add element
 	 * @param nameElement
 	 * nome elemento da aggiungere
 	 * @param mapAttributes
@@ -254,18 +287,18 @@ public class JSX {
 	public void addElement(String nameElement, HashMap<String, String> mapAttributes) throws XMLException, JSXLockException {
 		if (lock) {
 			try {
-				if(!reentrantLock.tryLock(30, TimeUnit.SECONDS)) throw new JSXLockException("Error Timeout Reentrant Lock");
+				if (!reentrantLock.tryLock(30, TimeUnit.SECONDS)) throw new JSXLockException("Error Timeout Reentrant Lock");
 			} catch (InterruptedException e) {
 				return;
 			}
 		}
 		writerXML.addElement(nameElement, mapAttributes);
 		if (lock) reentrantLock.unlock();
-		if (autoFlush) flush(pathFile, true);
+		if (autoFlush) flush(filePath, true);
 	}
 	
 	/**
-	 * 
+	 * method that add element
 	 * @param nameElement
 	 * nome elemento da aggiungere
 	 * @param idElement
@@ -278,19 +311,19 @@ public class JSX {
 	public void addElement(String nameElement, String idElement) throws XMLException, JSXLockException {
 		if (lock) {
 			try {
-				if(!reentrantLock.tryLock(30, TimeUnit.SECONDS)) throw new JSXLockException("Error Timeout Reentrant Lock");
+				if (!reentrantLock.tryLock(30, TimeUnit.SECONDS)) throw new JSXLockException("Error Timeout Reentrant Lock");
 			} catch (InterruptedException e) {
 				return;
 			}
 		}
 		writerXML.addElement(nameElement, idElement);
 		if (lock) reentrantLock.unlock();
-		if (autoFlush) flush(pathFile, true);
+		if (autoFlush) flush(filePath, true);
 	}
 	
 	
 	/**
-	 * 
+	 * method that add child element
 	 * @param parentNode
 	 * nodo in cui inserire il nuovo elemento
 	 * @param nameElement
@@ -306,7 +339,7 @@ public class JSX {
 	}
 
 	/**
-	 * 
+	 * method that add child element
 	 * @param parentNode
 	 * nodo in cui inserire il nuovo elemento
 	 * @param nameElement
@@ -322,6 +355,7 @@ public class JSX {
 	}
 
 	/**
+	 * method that add child element with child
 	 * @param nameElement
 	 * nome elemento da aggiungere
 	 * @param mapAttributes
@@ -336,18 +370,18 @@ public class JSX {
 	public void addElementWithChild(String nameElement, HashMap<String, String> mapAttributes, HashMap<String, String> mapChildNode) throws XMLException, JSXLockException {
 		if (lock) {
 			try {
-				if(!reentrantLock.tryLock(30, TimeUnit.SECONDS)) throw new JSXLockException("Error Timeout Reentrant Lock");
+				if (!reentrantLock.tryLock(30, TimeUnit.SECONDS)) throw new JSXLockException("Error Timeout Reentrant Lock");
 			} catch (InterruptedException e) {
 				return;
 			}
 		}
 		writerXML.addElementWithChild(nameElement, mapAttributes, mapChildNode);
 		if (lock) reentrantLock.unlock();
-		if (autoFlush) flush(pathFile, true);
+		if (autoFlush) flush(filePath, true);
 	}
 
 	/**
-	 * 
+	 * method that add child element with child
 	 * @param nameElement
 	 * nome elemento da aggiungere
 	 * @param idElement
@@ -362,18 +396,18 @@ public class JSX {
 	public void addElementWithChild(String nameElement, String idElement, HashMap<String, String> mapChildNode) throws XMLException, JSXLockException {
 		if (lock) {
 			try {
-				if(!reentrantLock.tryLock(30, TimeUnit.SECONDS)) throw new JSXLockException("Error Timeout Reentrant Lock");
+				if (!reentrantLock.tryLock(30, TimeUnit.SECONDS)) throw new JSXLockException("Error Timeout Reentrant Lock");
 			} catch (InterruptedException e) {
 				return;
 			}
 		}
 		writerXML.addElementWithChild(nameElement, idElement, mapChildNode);
 		if (lock) reentrantLock.unlock();
-		if (autoFlush) flush(pathFile, true);
+		if (autoFlush) flush(filePath, true);
 	}
 	
 	/**
-	 * 
+	 * method that add element
 	 * @param nameElement
 	 * nome elemento da aggiungere
 	 * @throws XMLException
@@ -384,18 +418,18 @@ public class JSX {
 	public void addElement(String nameElement) throws XMLException, JSXLockException {
 		if (lock) {
 			try {
-				if(!reentrantLock.tryLock(30, TimeUnit.SECONDS)) throw new JSXLockException("Error Timeout Reentrant Lock");
+				if (!reentrantLock.tryLock(30, TimeUnit.SECONDS)) throw new JSXLockException("Error Timeout Reentrant Lock");
 			} catch (InterruptedException e) {
 				return;
 			}
 		}
 		writerXML.addElement(nameElement);
 		if (lock) reentrantLock.unlock();
-		if (autoFlush) flush(pathFile, true);
+		if (autoFlush) flush(filePath, true);
 	}
 	
 	/**
-	 * 
+	 * method that add element eith text
 	 * @param nameElement
 	 * nome elemento da aggiungere
 	 * @param textContent
@@ -408,19 +442,19 @@ public class JSX {
 	public void addElementText(String nameElement, String textContent) throws XMLException, JSXLockException {
 		if (lock) {
 			try {
-				if(!reentrantLock.tryLock(30, TimeUnit.SECONDS)) throw new JSXLockException("Error Timeout Reentrant Lock");
+				if (!reentrantLock.tryLock(30, TimeUnit.SECONDS)) throw new JSXLockException("Error Timeout Reentrant Lock");
 			} catch (InterruptedException e) {
 				return;
 			}
 		}
 		writerXML.addElementText(nameElement, textContent);
 		if (lock) reentrantLock.unlock();
-		if (autoFlush) flush(pathFile, true);
+		if (autoFlush) flush(filePath, true);
 	}
 	
 
 	/**
-	 * 
+	 * method that add child element
 	 * @param parentNode
 	 * nodo in cui inserire il nuovo elemento
 	 * @param nameElement
@@ -435,7 +469,7 @@ public class JSX {
 
 	
 	/**
-	 * 
+	 * method that get array of elements
 	 * @param nameElements
 	 * nome elementi da inserire nella lista
 	 * @return ArrayList&lt;Node&gt;
@@ -446,7 +480,7 @@ public class JSX {
 	public ArrayList<Node> getArrayElements(String nameElements) throws JSXLockException {
 		if (lock) {
 			try {
-				if(!reentrantLock.tryLock(30, TimeUnit.SECONDS)) throw new JSXLockException("Error Timeout Reentrant Lock");
+				if (!reentrantLock.tryLock(30, TimeUnit.SECONDS)) throw new JSXLockException("Error Timeout Reentrant Lock");
 			} catch (InterruptedException e) {
 				return null;
 			}
@@ -457,7 +491,7 @@ public class JSX {
 	}
 
 	/**
-	 * 
+	 * method that add map id to element
 	 * @param nameElements
 	 * nome elementi da inserire nella lista
 	 * @return HashMap&lt;String, Node&gt;
@@ -468,7 +502,7 @@ public class JSX {
 	public HashMap<String, Node> getMapIdElement(String nameElements) throws JSXLockException {
 		if (lock) {
 			try {
-				if(!reentrantLock.tryLock(30, TimeUnit.SECONDS)) throw new JSXLockException("Error Timeout Reentrant Lock");
+				if (!reentrantLock.tryLock(30, TimeUnit.SECONDS)) throw new JSXLockException("Error Timeout Reentrant Lock");
 			} catch (InterruptedException e) {
 				return null;
 			}
@@ -479,7 +513,7 @@ public class JSX {
 	}
 
 	/**
-	 * 
+	 * method that get element by id
 	 * @param nameElements
 	 * nome elementi da cercare
 	 * @param idElement
@@ -492,7 +526,7 @@ public class JSX {
 	public Node getElementById(String nameElement, String idElement) throws JSXLockException {
 		if (lock) {
 			try {
-				if(!reentrantLock.tryLock(30, TimeUnit.SECONDS)) throw new JSXLockException("Error Timeout Reentrant Lock");
+				if (!reentrantLock.tryLock(30, TimeUnit.SECONDS)) throw new JSXLockException("Error Timeout Reentrant Lock");
 			} catch (InterruptedException e) {
 				return null;
 			}
@@ -504,7 +538,7 @@ public class JSX {
 
 
 	/**
-	 * 
+	 * method that get array of child node
 	 * @param parentNode
 	 * nodo genitore
 	 * @return ArrayList&lt;Node&gt;
@@ -516,7 +550,7 @@ public class JSX {
 	}
 
 	/**
-	 * 
+	 * method that get array of child node
 	 * @param parentNode
 	 * nodo genitore
 	 * @param nameElements
@@ -530,7 +564,7 @@ public class JSX {
 	}
 
 	/**
-	 * 
+	 * method that get child node by id
 	 * @param parentNode
 	 * nodo genitore
 	 * @param nameElements
@@ -546,7 +580,7 @@ public class JSX {
 	}
 
 	/**
-	 * 
+	 * method that get map id to child node
 	 * @param parentNode
 	 * nodo genitore
 	 * @param nameElements
@@ -560,7 +594,7 @@ public class JSX {
 	}
 	
 	/**
-	 * 
+	 * method that delete a node
 	 * @param nameElement
 	 * nome elemento da eliminare
 	 * @param id
@@ -572,17 +606,17 @@ public class JSX {
 	public void deleteNode(String nameElement, String id) throws XMLException, JSXLockException {
 		if (lock) {
 			try {
-				if(!reentrantLock.tryLock(30, TimeUnit.SECONDS)) throw new JSXLockException("Error Timeout Reentrant Lock");
+				if (!reentrantLock.tryLock(30, TimeUnit.SECONDS)) throw new JSXLockException("Error Timeout Reentrant Lock");
 			} catch (InterruptedException e) {
 			}
 		}
 		writerXML.deleteNode(nameElement, id);
 		if (lock) reentrantLock.unlock();
-		if (autoFlush) flush(pathFile, true);
+		if (autoFlush) flush(filePath, true);
 	}
 
 	/**
-	 * 
+	 * method that delete a node
 	 * @param node
 	 * oggetto nodo da eliminare
 	 */
@@ -591,7 +625,7 @@ public class JSX {
 	}
 
 	/**
-	 * 
+	 * method that get a great integer id
 	 * @param setId
 	 * set di id numerici
 	 * @return int
@@ -600,13 +634,13 @@ public class JSX {
 	/* metodo che torna l'id piu'grande da un set id */
 	public static int getGreatId(Set<String> setId) {
 		int greatId = Integer.MIN_VALUE;
-		for (String id : setId)
-			greatId = (Long.parseLong(id) > greatId) ? Integer.parseInt(id) : greatId; 
+		for (String id : setId) greatId = (Long.parseLong(id) > greatId) ? Integer.parseInt(id) : greatId; 
 			
 		return greatId;
 	}
 
 	/**
+	 * method that remove blank lines on document
 	 * metodo che elimina le righe bianche dal document
 	 * @param document
 	 * oggetto documento a cui si vogliono eliminare le righe vuote
@@ -619,17 +653,18 @@ public class JSX {
 			NodeList nl;
 			nl = (NodeList) xp.evaluate("//text()[normalize-space(.)='']", document, XPathConstants.NODESET);
 			
-			for (int i=0; i < nl.getLength(); ++i) {
+			for (int i=0, lenght = nl.getLength(); i < lenght; ++i) {
 				Node node = nl.item(i);
 				node.getParentNode().removeChild(node);
 			}
 		} catch (XPathExpressionException e) {
-			throw new JSXException("Errore derante l'eliminazione degli righe vuote.\n"
-									+ "Error Message: " + e.getMessage());
+			throw new JSXException("Error while deleting blank lines.\n"
+									+ "Error message: " + e.getMessage());
 		}
 	}
 
 	/**
+	 * method that remove blank lines on document
 	 * metodo che elimina le righe bianche dal document
 	 * @throws JSXException
 	 * eccezione sollevata se la rimozione delle linee vuote ritorna errori
@@ -639,7 +674,7 @@ public class JSX {
 	}
 
 	/**
-	 * 
+	 * method that save changes on XML file
 	 * @param filePath
 	 * path in cui salvare l'xml
 	 * @throws XMLException
@@ -650,7 +685,7 @@ public class JSX {
 	public void flush(String pathFile, boolean reloadDocument) throws XMLException, JSXLockException {
 		if (lock) {
 			try {
-				if(!reentrantLock.tryLock(30, TimeUnit.SECONDS)) throw new JSXLockException("Error Timeout Reentrant Lock");
+				if (!reentrantLock.tryLock(30, TimeUnit.SECONDS)) throw new JSXLockException("Error Timeout Reentrant Lock");
 			} catch (InterruptedException e) {
 				return;
 			}
@@ -666,11 +701,10 @@ public class JSX {
 			DOMSource source = new DOMSource(document);
 			StreamResult result = new StreamResult(new File(pathFile));
 			transformer.transform(source, result);
-			if (reloadDocument)
-				loadDocument();
+			if (reloadDocument) loadDocument();
 		} catch (TransformerException | JSXException e) {
-			throw new XMLException("Impossibile lavorare sul file XML.\n\t"
-										+ "Message error: " + e.getMessage());
+			throw new XMLException("Unable to work on XML file.\n\t"
+										+ "Error message: " + e.getMessage());
 		} finally {
 			if (lock) reentrantLock.unlock();
 		}

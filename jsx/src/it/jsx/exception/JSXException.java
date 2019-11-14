@@ -1,5 +1,10 @@
 package it.jsx.exception;
 
+/**
+ * Class for XML exception
+ * @author Andrea Serra
+ *
+ */
 public class JSXException extends Exception {
 	private static final long serialVersionUID = -1243194780849295228L;
 

@@ -1,5 +1,10 @@
 package it.jsx.exception;
 
+/**
+ * Class for generic JSX file exception
+ * @author Andrea Serra
+ *
+ */
 public class JSXLockException extends Exception {
 	private static final long serialVersionUID = 3897240434851969596L;
 

@@ -7,20 +7,32 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 
+/**
+ * Class for write a XML file
+ * @author Andrea Serra
+ *
+ */
 public class WriterXML {
 	private Document document;
 
-	/* costruttore */
+	/* CONSTRUCTOR */
 	protected WriterXML() {
 	}
 
-	/* get e set */
+	/* ################################################################################# */
+	/* START GET AND SET */
+	/* ################################################################################# */
+
 	public Document getDocument() {
 		return document;
 	}
 	public void setDocument(Document document) {
 		this.document = document;
 	}
+
+	/* ################################################################################# */
+	/* END GET AND SET */
+	/* ################################################################################# */
 
 	/**
 	 * 
@@ -35,18 +47,14 @@ public class WriterXML {
 										HashMap<String, HashMap<String, String>> mapAttributesChild) {
 		Element el = document.createElement(nameElement);
 		Set<String> setAttr = mapAttributes.keySet();
-		for (String attr : setAttr) {
-			el.setAttribute(attr, mapAttributes.get(attr));
-		}
+		for (String attr : setAttr) el.setAttribute(attr, mapAttributes.get(attr));
 
 		Set<String> setChild = mapChildNode.keySet();
 		Element childElmnt;
 		for (String childName : setChild) {
 			childElmnt = document.createElement(childName);
 			Set<String> setAttrChild = mapAttributesChild.get(childName).keySet();
-			for (String attr : setAttrChild) {
-				childElmnt.setAttribute(attr, mapAttributesChild.get(childName).get(attr));
-			}
+			for (String attr : setAttrChild) childElmnt.setAttribute(attr, mapAttributesChild.get(childName).get(attr));
 			childElmnt.setTextContent(mapChildNode.get(childName));
 			el.appendChild(childElmnt);
 		}
@@ -89,9 +97,7 @@ public class WriterXML {
 	protected void addElement(String nameElement, HashMap<String, String> mapAttributes) {
 		Element el = document.createElement(nameElement);
 		Set<String> setAttr = mapAttributes.keySet();
-		for (String attr : setAttr) {
-			el.setAttribute(attr, mapAttributes.get(attr));
-		}
+		for (String attr : setAttr) el.setAttribute(attr, mapAttributes.get(attr));
 		document.getFirstChild().appendChild(el);
 	}
 	
@@ -119,9 +125,7 @@ public class WriterXML {
 	protected void addElementWithChild(String nameElement, HashMap<String, String> mapAttributes, HashMap<String, String> mapChildNode) {
 		Element el = document.createElement(nameElement);
 		Set<String> setAttr = mapAttributes.keySet();
-		for (String attr : setAttr) {
-			el.setAttribute(attr, mapAttributes.get(attr));
-		}
+		for (String attr : setAttr) el.setAttribute(attr, mapAttributes.get(attr));
 
 		Set<String> setChild = mapChildNode.keySet();
 		Element childElmnt;
@@ -133,7 +137,6 @@ public class WriterXML {
 
 		document.getFirstChild().appendChild(el);
 	}
-
 
 	/**
 	 * 
@@ -184,9 +187,7 @@ public class WriterXML {
 	protected void addChildElement(Node parentNode, String nameElement, HashMap<String, String> mapAttributes, String textContext) {
 		Element el = parentNode.getOwnerDocument().createElement(nameElement);
 		Set<String> setAttr = mapAttributes.keySet();
-		for (String attr : setAttr) {
-			el.setAttribute(attr, mapAttributes.get(attr));
-		}
+		for (String attr : setAttr) el.setAttribute(attr, mapAttributes.get(attr));
 		el.setTextContent(textContext);
 		parentNode.appendChild(el);
 	}
