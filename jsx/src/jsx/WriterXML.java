@@ -1,4 +1,4 @@
-package it.jsx.core;
+package jsx;
 
 import java.util.HashMap;
 import java.util.Set;
@@ -43,8 +43,7 @@ public class WriterXML {
 	 * @param mapAttributesChild
 	 */
 	/* metodo che aggiunge elementi con child e mappe per attributi e scrive su Document */
-	protected void addElementWithChild(String nameElement, HashMap<String, String> mapAttributes, HashMap<String, String> mapChildNode,
-										HashMap<String, HashMap<String, String>> mapAttributesChild) {
+	protected void addElementWithChild(String nameElement, HashMap<String, String> mapAttributes, HashMap<String, String> mapChildNode, HashMap<String, HashMap<String, String>> mapAttributesChild) {
 		Element el = document.createElement(nameElement);
 		Set<String> setAttr = mapAttributes.keySet();
 		for (String attr : setAttr) el.setAttribute(attr, mapAttributes.get(attr));
@@ -72,8 +71,7 @@ public class WriterXML {
 	 * @param mapIdChild
 	 */
 	/* metodo che aggiunge elementi con child, setta attributo id e scrive su Document */
-	protected void addElementWithChild(String nameElement, String idElement, HashMap<String, String> mapChildNode,
-										HashMap<String, String> mapIdChild) {
+	protected void addElementWithChild(String nameElement, String idElement, HashMap<String, String> mapChildNode, HashMap<String, String> mapIdChild) {
 		HashMap<String, String> mapAttributes = new HashMap<String, String>();
 		mapAttributes.put("id", idElement);
 		Set<String> setKChldNd = mapChildNode.keySet();

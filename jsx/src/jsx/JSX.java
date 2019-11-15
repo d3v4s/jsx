@@ -1,4 +1,4 @@
-package it.jsx.core;
+package jsx;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,9 +27,9 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import it.jsx.exception.JSXException;
-import it.jsx.exception.JSXLockException;
-import it.jsx.exception.XMLException;
+import exception.JSXException;
+import exception.JSXLockException;
+import exception.XMLException;
 
 /**
  * Class for parser, create and change a XLM file 
@@ -173,8 +173,7 @@ public class JSX {
 	 * @throws XMLException
 	 * eccezione sollevata se la creazione dell'oggetto Document ritorna errori
 	 */
-	public static Document createDocument(String pathFile, boolean validating, boolean namespaceAware,
-					boolean featValidation, boolean featNamespaces, boolean featLoadDTDGramm, boolean featLoadExtDTD) throws XMLException {
+	public static Document createDocument(String pathFile, boolean validating, boolean namespaceAware, boolean featValidation, boolean featNamespaces, boolean featLoadDTDGramm, boolean featLoadExtDTD) throws XMLException {
 		try {
 			DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
 			
@@ -188,8 +187,7 @@ public class JSX {
 			DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
 			return docBuilder.parse(pathFile);
 		} catch (ParserConfigurationException | SAXException | IOException e) {
-			throw new XMLException("Unable to work on a XML file.\n\t"
-										+ "Error message: " + e.getMessage());
+			throw new XMLException("Unable to work on a XML file.\nError message: " + e.getMessage());
 		}
 	}
 
@@ -229,8 +227,7 @@ public class JSX {
 	 * eccezione sollevata se il flush e' true e ritorna errori
 	 * @throws JSXLockException
 	 */
-	public void addElementWithChild(String nameElement, HashMap<String, String> mapAttributes, HashMap<String, String> mapChildNode,
-										HashMap<String, HashMap<String, String>> mapAttributesChild) throws XMLException, JSXLockException {
+	public void addElementWithChild(String nameElement, HashMap<String, String> mapAttributes, HashMap<String, String> mapChildNode, HashMap<String, HashMap<String, String>> mapAttributesChild) throws XMLException, JSXLockException {
 		if (lock) {
 			try {
 				if (!reentrantLock.tryLock(30, TimeUnit.SECONDS)) throw new JSXLockException("Error Timeout Reentrant Lock");
@@ -258,8 +255,7 @@ public class JSX {
 	 * @throws JSXLockException 
 	 */
 	/* metodo che aggiunge elementi con child, setta attributo id e scrive su pathFile */
-	public void addElementWithChild(String nameElement, String idElement, HashMap<String, String> mapChildNode,
-										HashMap<String, String> mapIdChild) throws XMLException, JSXLockException {
+	public void addElementWithChild(String nameElement, String idElement, HashMap<String, String> mapChildNode, HashMap<String, String> mapIdChild) throws XMLException, JSXLockException {
 		if (lock) {
 			try {
 				if (!reentrantLock.tryLock(30, TimeUnit.SECONDS)) throw new JSXLockException("Error Timeout Reentrant Lock");
@@ -658,8 +654,7 @@ public class JSX {
 				node.getParentNode().removeChild(node);
 			}
 		} catch (XPathExpressionException e) {
-			throw new JSXException("Error while deleting blank lines.\n"
-									+ "Error message: " + e.getMessage());
+			throw new JSXException("Error while deleting blank lines.\nError message: " + e.getMessage());
 		}
 	}
 

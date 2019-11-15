@@ -1,4 +1,4 @@
-package it.jsx.core;
+package jsx;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -59,7 +59,6 @@ public class ReaderXML {
 	protected Node getElementById(String nameElement, String idElement) {
 		ArrayList<Node> listElements = getArrayElements(nameElement);
 		for (Node node : listElements) if (node.getNodeName().equals(nameElement) && node.getAttributes().getNamedItem("id").getTextContent().equals(idElement)) return node;
-
 		return null;
 	}
 
@@ -74,7 +73,6 @@ public class ReaderXML {
 		HashMap<String, Node> mapElement = new HashMap<String, Node>();
 		ArrayList<Node> listElement = getArrayElements(nameElements);
 		for (Node node : listElement)mapElement.put(node.getAttributes().getNamedItem("id").getTextContent(), node);
-
 		return mapElement;
 	}
 
@@ -102,7 +100,6 @@ public class ReaderXML {
 		ArrayList<Node> listNode = new ArrayList<Node>();
 		ArrayList<Node> nodeList = getArrayChildNode(parentNode);
 		for (Node node : nodeList) if (node.getNodeName().equals(nameNode)) listNode.add(node);
-
 		return listNode;
 	}
 
@@ -117,7 +114,6 @@ public class ReaderXML {
 	protected Node getChildNodeById(Node parentNode, String nameNode, String idElement) {
 		ArrayList<Node> nodelist = getArrayChildNode(parentNode);
 		for (Node node : nodelist) if (node.getNodeName().equals(nameNode) && node.getAttributes().getNamedItem("id").getTextContent().equals(idElement)) return node;
-
 		return null;
 	}
 
@@ -132,7 +128,6 @@ public class ReaderXML {
 		HashMap<String, Node> mapChildNode = new HashMap<String, Node>();
 		ArrayList<Node> listNode = getArrayChildNode(parentNode, nameElement);
 		for (Node node : listNode) mapChildNode.put(node.getAttributes().getNamedItem("id").getTextContent(), node);
-
 		return mapChildNode;
 	}
 }

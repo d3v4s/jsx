@@ -1,4 +1,4 @@
-package it.jsx.exception;
+package exception;
 
 /**
  * Class for XML exception
