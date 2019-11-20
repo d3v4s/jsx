@@ -673,6 +673,37 @@ public class JSX {
 	/* END READER DOCUMENT METHODS */
 	/* ################################################################################# */
 	
+	/* ################################################################################# */
+	/* START LOCK METHODS */
+	/* ################################################################################# */
+	
+	/**
+	 * method that check if is set lock and try to lock a document
+	 * @return true if lock is disabled or successfully lock a file, false otherwise  
+	 * @throws JSXLockException
+	 */
+	public boolean tryLock() throws JSXLockException {
+		if (lock) {
+			try {
+				if (!reentrantLock.tryLock(30, TimeUnit.SECONDS)) throw new JSXLockException("Error Timeout Reentrant Lock");
+			} catch (InterruptedException e) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	/**
+	 * method that check if lock is set and unlock a document 
+	 */
+	public void tryUnlock() {
+		if (lock) reentrantLock.unlock();
+	}
+	
+	/* ################################################################################# */
+	/* END LOCK METHODS */
+	/* ################################################################################# */
+	
 	/**
 	 * method that save changes on XML file
 	 * @param filePath
@@ -704,35 +735,4 @@ public class JSX {
 			}
 		}
 	}
-
-	/* ################################################################################# */
-	/* START PRIVATE METHODS */
-	/* ################################################################################# */
-	
-	/**
-	 * method that check if is set lock and try to lock a document
-	 * @return true if lock is disabled or successfully lock a file, false otherwise  
-	 * @throws JSXLockException
-	 */
-	private boolean tryLock() throws JSXLockException {
-		if (lock) {
-			try {
-				if (!reentrantLock.tryLock(30, TimeUnit.SECONDS)) throw new JSXLockException("Error Timeout Reentrant Lock");
-			} catch (InterruptedException e) {
-				return false;
-			}
-		}
-		return true;
-	}
-
-	/**
-	 * method that check if lock is set and unlock a document 
-	 */
-	private void tryUnlock() {
-		if (lock) reentrantLock.unlock();
-	}
-
-	/* ################################################################################# */
-	/* END PRIVATE METHODS */
-	/* ################################################################################# */
 }
