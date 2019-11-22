@@ -19,7 +19,6 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
 import org.w3c.dom.Document;
@@ -65,7 +64,7 @@ public class JSX {
 	 * @throws XMLException
 	 * @throws JSXLockException
 	 */
-	public JSX(String filePath) throws XMLException, JSXLockException {
+	public JSX(String filePath) throws JSXLockException {
 		this.filePath = filePath;
 		loadDocument();
 	}
@@ -206,7 +205,6 @@ public class JSX {
 	public static int getGreatId(Set<String> setId) {
 		int greatId = Integer.MIN_VALUE;
 		for (String id : setId) greatId = (Long.parseLong(id) > greatId) ? Integer.parseInt(id) : greatId; 
-			
 		return greatId;
 	}
 
@@ -228,7 +226,7 @@ public class JSX {
 				Node node = nl.item(i);
 				node.getParentNode().removeChild(node);
 			}
-		} catch (XPathExpressionException e) {
+		} catch (Exception e) {
 			throw new JSXException("Error while deleting blank lines.\nError message: " + e.getMessage());
 		}
 	}
@@ -236,22 +234,6 @@ public class JSX {
 	/* ################################################################################# */
 	/* END STATIC METHODS */
 	/* ################################################################################# */
-
-	/**
-	 * method that load a Document
-	 * metodo che carica il doc
-	 * @throws XMLException
-	 * eccezione sollevata se la creazione dell'oggetto Document ritorna errori
-	 * @throws JSXLockException 
-	 */
-	public void loadDocument() throws XMLException, JSXLockException {
-		if (tryLock()) {
-			document = createDocument(filePath, validating, namespaceAware, featValidation, featNamespaces, featLoadDTDGramm, featLoadExtDTD);
-			writerXML.setDocument(document);
-			readerXML.setDocument(document);
-			tryUnlock();
-		}
-	}
 
 	/* ################################################################################# */
 	/* START DOCUMENT WRITER METHODS */
@@ -268,11 +250,9 @@ public class JSX {
 	 * mappa elementi figli del nuovo elemento, da impostare con &lt;nome_elemento, test_interno_tag&gt;
 	 * @param mapAttributesChild
 	 * mappa attributi degli elementi figli, da impostare con &lt;nome_elemento, &lt;chiave, valore&gt;&gt;
-	 * @throws XMLException
-	 * eccezione sollevata se il flush e' true e ritorna errori
-	 * @throws JSXLockException
+	 * @throws JSXLockException 
 	 */
-	public void addElementWithChild(String nameElement, HashMap<String, String> mapAttributes, HashMap<String, String> mapChildNode, HashMap<String, HashMap<String, String>> mapAttributesChild) throws XMLException, JSXLockException {
+	public void addElementWithChild(String nameElement, HashMap<String, String> mapAttributes, HashMap<String, String> mapChildNode, HashMap<String, HashMap<String, String>> mapAttributesChild) throws JSXLockException {
 		if (tryLock()) {
 			writerXML.addElementWithChild(nameElement, mapAttributes, mapChildNode, mapAttributesChild);
 			tryUnlock();
@@ -290,12 +270,10 @@ public class JSX {
 	 * mappa elementi figli del nuovo elemento, da impostare con &lt;nome_elemento, test_interno_tag&gt;
 	 * @param mapIdChild
 	 * mappa id elementi figli del nuovo elemento, da impostare con &lt;nome_elemento, id&gt;
-	 * @throws XMLException
-	 * eccezione sollevata se il flush e' true e ritorna errori
 	 * @throws JSXLockException 
 	 */
 	/* metodo che aggiunge elementi con child, setta attributo id e scrive su pathFile */
-	public void addElementWithChild(String nameElement, String idElement, HashMap<String, String> mapChildNode, HashMap<String, String> mapIdChild) throws XMLException, JSXLockException {
+	public void addElementWithChild(String nameElement, String idElement, HashMap<String, String> mapChildNode, HashMap<String, String> mapIdChild) throws JSXLockException {
 		if (tryLock()) {
 			writerXML.addElementWithChild(nameElement, idElement, mapChildNode, mapIdChild);
 			tryUnlock();
@@ -310,12 +288,10 @@ public class JSX {
 	 * nome elemento da aggiungere
 	 * @param mapAttributes
 	 * mappa attributi da inserire sul nuovo elemento, da impostare con &lt;chiave, valore&gt;
-	 * @throws XMLException
-	 * eccezione sollevata se il flush e' true e ritorna errori
 	 * @throws JSXLockException 
 	 */
 	/* metodo che aggiunge un elemento al firstchild con mappa attributi su pathFileName */
-	public void addElement(String nameElement, HashMap<String, String> mapAttributes) throws XMLException, JSXLockException {
+	public void addElement(String nameElement, HashMap<String, String> mapAttributes) throws JSXLockException {
 		if (tryLock()) {
 			writerXML.addElement(nameElement, mapAttributes);
 			tryUnlock();
@@ -329,12 +305,10 @@ public class JSX {
 	 * nome elemento da aggiungere
 	 * @param idElement
 	 * id da dare all'elemento
-	 * @throws XMLException
-	 * eccezione sollevata se il flush e' true e ritorna errori
 	 * @throws JSXLockException 
 	 */
 	/* metodo che aggiunge un elemento al firstchild con attributo id su pathFileName */
-	public void addElement(String nameElement, String idElement) throws XMLException, JSXLockException {
+	public void addElement(String nameElement, String idElement) throws JSXLockException {
 		if (tryLock()) {
 			writerXML.addElement(nameElement, idElement);
 			tryUnlock();
@@ -391,12 +365,10 @@ public class JSX {
 	 * mappa attributi da inserire sul nuovo elemento, da impostare con &lt;chiave, valore&gt;
 	 * @param mapChildNode
 	 * mappa elementi figli del nuovo elemento, da impostare con &lt;nome_elemento, test_interno_tag&gt;
-	 * @throws XMLException
-	 * eccezione sollevata se il flush e' true e ritorna errori
 	 * @throws JSXLockException 
 	 */
 	/* metodo che aggiunge elementi con child e mappe per attributi e scrive su pathFile */
-	public void addElementWithChild(String nameElement, HashMap<String, String> mapAttributes, HashMap<String, String> mapChildNode) throws XMLException, JSXLockException {
+	public void addElementWithChild(String nameElement, HashMap<String, String> mapAttributes, HashMap<String, String> mapChildNode) throws JSXLockException {
 		if (tryLock()) {
 			writerXML.addElementWithChild(nameElement, mapAttributes, mapChildNode);
 			tryUnlock();
@@ -412,12 +384,10 @@ public class JSX {
 	 * id da dare all'elemento
 	 * @param mapChildNode
 	 * mappa elementi figli del nuovo elemento, da impostare con &lt;nome_elemento, test_interno_tag&gt;
-	 * @throws XMLException
-	 * eccezione sollevata se il flush e' true e ritorna errori
 	 * @throws JSXLockException 
 	 */
 	/* metodo che aggiunge elementi con child, setta attributo id e scrive su Document */
-	public void addElementWithChild(String nameElement, String idElement, HashMap<String, String> mapChildNode) throws XMLException, JSXLockException {
+	public void addElementWithChild(String nameElement, String idElement, HashMap<String, String> mapChildNode) throws JSXLockException {
 		if (tryLock()) {
 			writerXML.addElementWithChild(nameElement, idElement, mapChildNode);
 			tryUnlock();
@@ -429,12 +399,10 @@ public class JSX {
 	 * method that add element
 	 * @param nameElement
 	 * nome elemento da aggiungere
-	 * @throws XMLException
-	 * eccezione sollevata se il flush e' true e ritorna errori
 	 * @throws JSXLockException 
 	 */
 	/* metodo che aggiunge un elemento al firstchild con mappa attributi su pathFileName */
-	public void addElement(String nameElement) throws XMLException, JSXLockException {
+	public void addElement(String nameElement) throws JSXLockException {
 		if (tryLock()) {
 			writerXML.addElement(nameElement);
 			tryUnlock();
@@ -448,12 +416,10 @@ public class JSX {
 	 * nome elemento da aggiungere
 	 * @param textContent
 	 * testo da inserire all'interno del nuovo elemento
-	 * @throws XMLException
-	 * eccezione sollevata se il flush e' true e ritorna errori
 	 * @throws JSXLockException 
 	 */
 	/* metodo che aggiunge un elemento al firstchild con attributo id su pathFileName */
-	public void addElementText(String nameElement, String textContent) throws XMLException, JSXLockException {
+	public void addElementText(String nameElement, String textContent) throws JSXLockException {
 		if (tryLock()) {
 			writerXML.addElementText(nameElement, textContent);
 			tryUnlock();
@@ -486,11 +452,9 @@ public class JSX {
 	 * nome elemento da eliminare
 	 * @param id
 	 * id elemento da eliminare
-	 * @throws XMLException
-	 * eccezione sollevata se il flush e' true e ritorna errori
 	 * @throws JSXLockException 
 	 */
-	public void deleteNode(String nameElement, String id) throws XMLException, JSXLockException {
+	public void deleteNode(String nameElement, String id) throws JSXLockException {
 		if (tryLock()) {
 			writerXML.deleteNode(nameElement, id);
 			tryUnlock();
@@ -514,14 +478,17 @@ public class JSX {
 	/**
 	 * method that remove blank lines on document
 	 * metodo che elimina le righe bianche dal document
-	 * @throws JSXException
-	 * eccezione sollevata se la rimozione delle linee vuote ritorna errori
 	 * @throws JSXLockException 
 	 */
-	public void removeBlankLines() throws JSXException, JSXLockException {
+	public void removeBlankLines() throws JSXLockException {
 		if (tryLock()) {
-			removeBlankLines(document);
-			tryUnlock();
+			try {
+				removeBlankLines(document);
+			} catch (JSXException e) {
+				e.printStackTrace();
+			} finally {
+				tryUnlock();
+			}
 		}
 	}
 
@@ -708,12 +675,10 @@ public class JSX {
 	 * method that save changes on XML file
 	 * @param filePath
 	 * path in cui salvare l'xml
-	 * @throws XMLException
-	 * eccezione sollevata se il salvataggio del file xml ritorna erroriS
 	 * @throws JSXLockException 
 	 */
 	/* salva modifiche nel file xml */
-	public void flush(String pathFile, boolean reloadDocument) throws XMLException, JSXLockException {
+	public void flush(String pathFile, boolean reloadDocument) throws JSXLockException {
 		if (tryLock()) {
 			try {
 				TransformerFactory transformerFactory = TransformerFactory.newInstance();
@@ -727,9 +692,26 @@ public class JSX {
 				StreamResult result = new StreamResult(new File(pathFile));
 				transformer.transform(source, result);
 				if (reloadDocument) loadDocument();
-			} catch (TransformerException | JSXException e) {
-				throw new XMLException("Unable to work on XML file.\n\t"
-						+ "Error message: " + e.getMessage());
+			} catch (TransformerException e) {
+				e.printStackTrace();
+			} finally {
+				tryUnlock();
+			}
+		}
+	}
+
+	/**
+	 * method that load the Document
+	 * @throws JSXLockException 
+	 */
+	public void loadDocument() throws JSXLockException {
+		if (tryLock()) {
+			try {
+				document = createDocument(filePath, validating, namespaceAware, featValidation, featNamespaces, featLoadDTDGramm, featLoadExtDTD);
+				writerXML.setDocument(document);
+				readerXML.setDocument(document);
+			} catch (XMLException e) {
+				e.printStackTrace();
 			} finally {
 				tryUnlock();
 			}
