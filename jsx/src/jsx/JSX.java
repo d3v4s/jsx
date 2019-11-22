@@ -334,6 +334,7 @@ public class JSX {
 		if (tryLock()) {
 			writerXML.addChildElement(parentNode, nameElement, mapAttributes, textContext);
 			tryUnlock();
+			if (autoFlush) flush(filePath, true);
 		}
 	}
 
@@ -354,6 +355,7 @@ public class JSX {
 		if (tryLock()) {
 			writerXML.addChildElement(parentNode, nameElement, idElement, textContext);
 			tryUnlock();
+			if (autoFlush) flush(filePath, true);
 		}
 	}
 
@@ -443,6 +445,7 @@ public class JSX {
 		if (tryLock()) {
 			writerXML.addChildElement(parentNode, nameElement, textContext);
 			tryUnlock();
+			if (autoFlush) flush(filePath, true);
 		}
 	}
 
@@ -472,6 +475,7 @@ public class JSX {
 		if (tryLock()) {
 			writerXML.deleteNode(node);
 			tryUnlock();
+			if (autoFlush) flush(filePath, true);
 		}
 	}
 
@@ -484,6 +488,7 @@ public class JSX {
 		if (tryLock()) {
 			try {
 				removeBlankLines(document);
+				if (autoFlush) flush(filePath, true);
 			} catch (JSXException e) {
 				e.printStackTrace();
 			} finally {
