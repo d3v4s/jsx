@@ -503,6 +503,7 @@ public class JSX {
 		if (tryLock()) {
 			try {
 				removeBlankLines(document);
+				if (autoFlush) flush(filePath, true);
 			} catch (JSXException e) {
 				e.printStackTrace();
 			} finally {
