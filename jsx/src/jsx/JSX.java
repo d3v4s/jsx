@@ -450,6 +450,21 @@ public class JSX {
 	}
 
 	/**
+	 * method that append element with child on node
+	 * @param node parent
+	 * @param nameElement
+	 * @param mapChildNode element child
+	 * @throws JSXLockException
+	 */
+	public void appendElementWithChild(Node node, String nameElement, HashMap<String, String> mapChildNode) throws JSXLockException {
+		if (tryLock()) {
+			writerXML.appendElementWithChild(node, nameElement, mapChildNode);
+			tryUnlock();
+			if (autoFlush) flush(filePath, true);
+		}
+	}
+
+	/**
 	 * method that delete a node
 	 * @param nameElement
 	 * nome elemento da eliminare

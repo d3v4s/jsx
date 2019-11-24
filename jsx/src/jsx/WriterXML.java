@@ -49,10 +49,11 @@ public class WriterXML {
 		for (String attr : setAttr) el.setAttribute(attr, mapAttributes.get(attr));
 
 		Set<String> setChild = mapChildNode.keySet();
+		Set<String> setAttrChild;
 		Element childElmnt;
 		for (String childName : setChild) {
 			childElmnt = document.createElement(childName);
-			Set<String> setAttrChild = mapAttributesChild.get(childName).keySet();
+			setAttrChild = mapAttributesChild.get(childName).keySet();
 			for (String attr : setAttrChild) childElmnt.setAttribute(attr, mapAttributesChild.get(childName).get(attr));
 			childElmnt.setTextContent(mapChildNode.get(childName));
 			el.appendChild(childElmnt);
@@ -114,7 +115,6 @@ public class WriterXML {
 
 	/**
 	 * 
-	 * @param document
 	 * @param nameElement
 	 * @param mapAttributes
 	 * @param mapChildNode
@@ -215,6 +215,26 @@ public class WriterXML {
 		Element el = parentNode.getOwnerDocument().createElement(nameElement);
 		el.setTextContent(textContext);
 		parentNode.appendChild(el);
+	}
+
+	/**
+	 * method that append a element with child on node
+	 * @param node
+	 * @param nameElement
+	 * @param mapChildNode
+	 */
+	protected void appendElementWithChild(Node node, String nameElement, HashMap<String, String> mapChildNode) {
+		Element el = document.createElement(nameElement);
+
+		Set<String> setChild = mapChildNode.keySet();
+		Element childElmnt;
+		for (String childName : setChild) {
+			childElmnt = document.createElement(childName);
+			childElmnt.setTextContent(mapChildNode.get(childName));
+			el.appendChild(childElmnt);
+		}
+
+		node.appendChild(el);
 	}
 
 	/**
