@@ -334,6 +334,7 @@ public class JSX {
 		if (tryLock()) {
 			writerXML.addChildElement(parentNode, nameElement, mapAttributes, textContext);
 			tryUnlock();
+			if (autoFlush) flush(filePath, true);
 		}
 	}
 
@@ -354,6 +355,7 @@ public class JSX {
 		if (tryLock()) {
 			writerXML.addChildElement(parentNode, nameElement, idElement, textContext);
 			tryUnlock();
+			if (autoFlush) flush(filePath, true);
 		}
 	}
 
@@ -443,6 +445,22 @@ public class JSX {
 		if (tryLock()) {
 			writerXML.addChildElement(parentNode, nameElement, textContext);
 			tryUnlock();
+			if (autoFlush) flush(filePath, true);
+		}
+	}
+
+	/**
+	 * method that append element with child on node
+	 * @param node parent
+	 * @param nameElement
+	 * @param mapChildNode element child
+	 * @throws JSXLockException
+	 */
+	public void appendElementWithChild(Node node, String nameElement, HashMap<String, String> mapChildNode) throws JSXLockException {
+		if (tryLock()) {
+			writerXML.appendElementWithChild(node, nameElement, mapChildNode);
+			tryUnlock();
+			if (autoFlush) flush(filePath, true);
 		}
 	}
 
@@ -472,6 +490,7 @@ public class JSX {
 		if (tryLock()) {
 			writerXML.deleteNode(node);
 			tryUnlock();
+			if (autoFlush) flush(filePath, true);
 		}
 	}
 
