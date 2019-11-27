@@ -36,25 +36,28 @@ import exception.XMLException;
  *
  */
 public class JSX {
-	private String filePath;
-	private Document document;
-	private int indentAmount = 4;
-	private boolean lock = false;
-	private boolean autoFlush = false;
-	private boolean validating = false;
+	private final ReentrantLock REENTRANT_LOCK = new ReentrantLock();
+	private final WriterXML XML_WRITER = new WriterXML();
+	private final ReaderXML XML_READER = new ReaderXML();
+	private boolean featLoadDTDGramm = false;
 	private boolean namespaceAware = false;
 	private boolean featValidation = false;
 	private boolean featNamespaces = false;
-	private boolean featLoadDTDGramm = false;
 	private boolean featLoadExtDTD = false;
-	private final ReentrantLock reentrantLock = new ReentrantLock();
-	private final WriterXML writerXML = new WriterXML();
-	private final ReaderXML readerXML = new ReaderXML();
+	private boolean validating = false;
+	private boolean autoFlush = false;
+	private boolean lock = false;
+	private int indentAmount = 4;
+	private Document document;
+	private String filePath;
 
 	/* ################################################################################# */
 	/* START CONSTRUCTORS */
 	/* ################################################################################# */
 
+	/**
+	 * simple construct
+	 */
 	public JSX() {
 	}
 
@@ -75,8 +78,8 @@ public class JSX {
 	 */
 	public JSX(Document document) {
 		this.document = document;
-		writerXML.setDocument(document);
-		readerXML.setDocument(document);
+		XML_WRITER.setDocument(document);
+		XML_READER.setDocument(document);
 	}
 
 	/* ################################################################################# */
@@ -88,7 +91,7 @@ public class JSX {
 	/* ################################################################################# */
 
 	public ReentrantLock getReentrantLock() {
-		return reentrantLock;
+		return REENTRANT_LOCK;
 	}
 	public String getFilePath() {
 		return filePath;
@@ -98,8 +101,8 @@ public class JSX {
 	}
 	public void setDocument(Document document) {
 		this.document = document;
-		writerXML.setDocument(document);
-		readerXML.setDocument(document);
+		XML_WRITER.setDocument(document);
+		XML_READER.setDocument(document);
 	}
 	public boolean isLock() {
 		return lock;
@@ -254,7 +257,7 @@ public class JSX {
 	 */
 	public void addElementWithChild(String nameElement, HashMap<String, String> mapAttributes, HashMap<String, String> mapChildNode, HashMap<String, HashMap<String, String>> mapAttributesChild) throws JSXLockException {
 		if (tryLock()) {
-			writerXML.addElementWithChild(nameElement, mapAttributes, mapChildNode, mapAttributesChild);
+			XML_WRITER.addElementWithChild(nameElement, mapAttributes, mapChildNode, mapAttributesChild);
 			tryUnlock();
 			if (autoFlush) flush(filePath, true);
 		}
@@ -275,7 +278,7 @@ public class JSX {
 	/* metodo che aggiunge elementi con child, setta attributo id e scrive su pathFile */
 	public void addElementWithChild(String nameElement, String idElement, HashMap<String, String> mapChildNode, HashMap<String, String> mapIdChild) throws JSXLockException {
 		if (tryLock()) {
-			writerXML.addElementWithChild(nameElement, idElement, mapChildNode, mapIdChild);
+			XML_WRITER.addElementWithChild(nameElement, idElement, mapChildNode, mapIdChild);
 			tryUnlock();
 			if (autoFlush) flush(filePath, true);
 		}
@@ -293,7 +296,7 @@ public class JSX {
 	/* metodo che aggiunge un elemento al firstchild con mappa attributi su pathFileName */
 	public void addElement(String nameElement, HashMap<String, String> mapAttributes) throws JSXLockException {
 		if (tryLock()) {
-			writerXML.addElement(nameElement, mapAttributes);
+			XML_WRITER.addElement(nameElement, mapAttributes);
 			tryUnlock();
 			if (autoFlush) flush(filePath, true);
 		}
@@ -310,7 +313,7 @@ public class JSX {
 	/* metodo che aggiunge un elemento al firstchild con attributo id su pathFileName */
 	public void addElement(String nameElement, String idElement) throws JSXLockException {
 		if (tryLock()) {
-			writerXML.addElement(nameElement, idElement);
+			XML_WRITER.addElement(nameElement, idElement);
 			tryUnlock();
 			if (autoFlush) flush(filePath, true);
 		}
@@ -332,7 +335,7 @@ public class JSX {
 	/* metodo che aggiunge un elemento figlio al node con mappe attributi */
 	public void addChildElement(Node parentNode, String nameElement, HashMap<String, String> mapAttributes, String textContext) throws JSXLockException {
 		if (tryLock()) {
-			writerXML.addChildElement(parentNode, nameElement, mapAttributes, textContext);
+			XML_WRITER.addChildElement(parentNode, nameElement, mapAttributes, textContext);
 			tryUnlock();
 			if (autoFlush) flush(filePath, true);
 		}
@@ -353,7 +356,7 @@ public class JSX {
 	/* metodo che aggiunge un elemento figlio al node con id */
 	public void addChildElement(Node parentNode, String nameElement, String idElement, String textContext) throws JSXLockException {
 		if (tryLock()) {
-			writerXML.addChildElement(parentNode, nameElement, idElement, textContext);
+			XML_WRITER.addChildElement(parentNode, nameElement, idElement, textContext);
 			tryUnlock();
 			if (autoFlush) flush(filePath, true);
 		}
@@ -372,7 +375,7 @@ public class JSX {
 	/* metodo che aggiunge elementi con child e mappe per attributi e scrive su pathFile */
 	public void addElementWithChild(String nameElement, HashMap<String, String> mapAttributes, HashMap<String, String> mapChildNode) throws JSXLockException {
 		if (tryLock()) {
-			writerXML.addElementWithChild(nameElement, mapAttributes, mapChildNode);
+			XML_WRITER.addElementWithChild(nameElement, mapAttributes, mapChildNode);
 			tryUnlock();
 			if (autoFlush) flush(filePath, true);
 		}
@@ -391,7 +394,7 @@ public class JSX {
 	/* metodo che aggiunge elementi con child, setta attributo id e scrive su Document */
 	public void addElementWithChild(String nameElement, String idElement, HashMap<String, String> mapChildNode) throws JSXLockException {
 		if (tryLock()) {
-			writerXML.addElementWithChild(nameElement, idElement, mapChildNode);
+			XML_WRITER.addElementWithChild(nameElement, idElement, mapChildNode);
 			tryUnlock();
 			if (autoFlush) flush(filePath, true);
 		}
@@ -406,7 +409,7 @@ public class JSX {
 	/* metodo che aggiunge un elemento al firstchild con mappa attributi su pathFileName */
 	public void addElement(String nameElement) throws JSXLockException {
 		if (tryLock()) {
-			writerXML.addElement(nameElement);
+			XML_WRITER.addElement(nameElement);
 			tryUnlock();
 			if (autoFlush) flush(filePath, true);
 		}
@@ -423,7 +426,7 @@ public class JSX {
 	/* metodo che aggiunge un elemento al firstchild con attributo id su pathFileName */
 	public void addElementText(String nameElement, String textContent) throws JSXLockException {
 		if (tryLock()) {
-			writerXML.addElementText(nameElement, textContent);
+			XML_WRITER.addElementText(nameElement, textContent);
 			tryUnlock();
 			if (autoFlush) flush(filePath, true);
 		}
@@ -443,7 +446,7 @@ public class JSX {
 	/* metodo che aggiunge un elemento figlio al node con mappe attributi */
 	public void addChildElement(Node parentNode, String nameElement, String textContext) throws JSXLockException {
 		if (tryLock()) {
-			writerXML.addChildElement(parentNode, nameElement, textContext);
+			XML_WRITER.addChildElement(parentNode, nameElement, textContext);
 			tryUnlock();
 			if (autoFlush) flush(filePath, true);
 		}
@@ -458,7 +461,7 @@ public class JSX {
 	 */
 	public void appendElementWithChild(Node node, String nameElement, HashMap<String, String> mapChildNode) throws JSXLockException {
 		if (tryLock()) {
-			writerXML.appendElementWithChild(node, nameElement, mapChildNode);
+			XML_WRITER.appendElementWithChild(node, nameElement, mapChildNode);
 			tryUnlock();
 			if (autoFlush) flush(filePath, true);
 		}
@@ -474,7 +477,7 @@ public class JSX {
 	 */
 	public void deleteNode(String nameElement, String id) throws JSXLockException {
 		if (tryLock()) {
-			writerXML.deleteNode(nameElement, id);
+			XML_WRITER.deleteNode(nameElement, id);
 			tryUnlock();
 			if (autoFlush) flush(filePath, true);
 		}
@@ -488,7 +491,7 @@ public class JSX {
 	 */
 	public void deleteNode(Node node) throws JSXLockException {
 		if (tryLock()) {
-			writerXML.deleteNode(node);
+			XML_WRITER.deleteNode(node);
 			tryUnlock();
 			if (autoFlush) flush(filePath, true);
 		}
@@ -532,7 +535,7 @@ public class JSX {
 	public ArrayList<Node> getArrayElements(String nameElements) throws JSXLockException {
 		ArrayList<Node> nodeList = null;
 		if (tryLock()) {
-			readerXML.getArrayElements(nameElements);
+			XML_READER.getArrayElements(nameElements);
 			tryUnlock();
 		}
 		return nodeList;
@@ -550,7 +553,7 @@ public class JSX {
 	public HashMap<String, Node> getMapIdElement(String nameElements) throws JSXLockException {
 		HashMap<String, Node> nodeMap = null;
 		if (tryLock()) {
-			nodeMap = readerXML.getMapIdElement(nameElements);
+			nodeMap = XML_READER.getMapIdElement(nameElements);
 			tryUnlock();
 		}
 		return nodeMap;
@@ -570,7 +573,7 @@ public class JSX {
 	public Node getElementById(String nameElement, String idElement) throws JSXLockException {
 		Node node = null;
 		if (tryLock()) {
-			node = readerXML.getElementById(nameElement, idElement);
+			node = XML_READER.getElementById(nameElement, idElement);
 			tryUnlock();
 		}
 		return node;
@@ -588,7 +591,7 @@ public class JSX {
 	public ArrayList<Node> getArrayChildNode(Node parentNode) throws JSXLockException {
 		ArrayList<Node> nodeList = null;
 		if (tryLock()) {
-			nodeList = readerXML.getArrayChildNode(parentNode);
+			nodeList = XML_READER.getArrayChildNode(parentNode);
 			tryUnlock();
 		}
 		return nodeList;
@@ -608,7 +611,7 @@ public class JSX {
 	public ArrayList<Node> getArrayChildNode(Node parentNode, String nameElements) throws JSXLockException {
 		ArrayList<Node> nodeList = null;
 		if (tryLock()) {
-			nodeList = readerXML.getArrayChildNode(parentNode, nameElements);
+			nodeList = XML_READER.getArrayChildNode(parentNode, nameElements);
 			tryUnlock();
 		}
 		return nodeList;
@@ -630,7 +633,7 @@ public class JSX {
 	public Node getChildNodeById(Node parentNode, String nameElements, String idElement) throws JSXLockException {
 		Node node = null;
 		if (tryLock()) {
-			node = readerXML.getChildNodeById(parentNode, nameElements, idElement);
+			node = XML_READER.getChildNodeById(parentNode, nameElements, idElement);
 			tryUnlock();
 		}
 		return node;
@@ -650,7 +653,7 @@ public class JSX {
 	public HashMap<String, Node> getMapIdChildNode(Node parentNode, String nameElement) throws JSXLockException {
 		HashMap<String, Node> map = null;
 		if (tryLock()) {
-			map = readerXML.getMapIdChildNode(parentNode, nameElement);
+			map = XML_READER.getMapIdChildNode(parentNode, nameElement);
 			tryUnlock();
 		}
 		return map;
@@ -672,7 +675,7 @@ public class JSX {
 	public boolean tryLock() throws JSXLockException {
 		if (lock) {
 			try {
-				if (!reentrantLock.tryLock(30, TimeUnit.SECONDS)) throw new JSXLockException("Error Timeout Reentrant Lock");
+				if (!REENTRANT_LOCK.tryLock(30, TimeUnit.SECONDS)) throw new JSXLockException("Error Timeout Reentrant Lock");
 			} catch (InterruptedException e) {
 				return false;
 			}
@@ -684,7 +687,7 @@ public class JSX {
 	 * method that check if lock is set and unlock a document 
 	 */
 	public void tryUnlock() {
-		if (lock) reentrantLock.unlock();
+		if (lock) REENTRANT_LOCK.unlock();
 	}
 	
 	/* ################################################################################# */
@@ -728,8 +731,8 @@ public class JSX {
 		if (tryLock()) {
 			try {
 				document = createDocument(filePath, validating, namespaceAware, featValidation, featNamespaces, featLoadDTDGramm, featLoadExtDTD);
-				writerXML.setDocument(document);
-				readerXML.setDocument(document);
+				XML_WRITER.setDocument(document);
+				XML_READER.setDocument(document);
 			} catch (XMLException e) {
 				e.printStackTrace();
 			} finally {
