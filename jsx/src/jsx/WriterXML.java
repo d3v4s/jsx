@@ -23,10 +23,10 @@ public class WriterXML {
 	/* START GET AND SET */
 	/* ################################################################################# */
 
-	public Document getDocument() {
+	protected Document getDocument() {
 		return document;
 	}
-	public void setDocument(Document document) {
+	protected void setDocument(Document document) {
 		this.document = document;
 	}
 
