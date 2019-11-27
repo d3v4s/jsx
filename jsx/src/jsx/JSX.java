@@ -64,7 +64,6 @@ public class JSX {
 	/**
 	 * constructor that set a file path
 	 * @param filePath of XML
-	 * @throws XMLException
 	 * @throws JSXLockException
 	 */
 	public JSX(String filePath) throws JSXLockException {
@@ -77,9 +76,7 @@ public class JSX {
 	 * @param document XML
 	 */
 	public JSX(Document document) {
-		this.document = document;
-		XML_WRITER.setDocument(document);
-		XML_READER.setDocument(document);
+		setDocument(document);
 	}
 
 	/* ################################################################################# */
@@ -87,88 +84,36 @@ public class JSX {
 	/* ################################################################################# */
 
 	/* ################################################################################# */
-	/* START GET AND SET */
-	/* ################################################################################# */
-
-	public ReentrantLock getReentrantLock() {
-		return REENTRANT_LOCK;
-	}
-	public String getFilePath() {
-		return filePath;
-	}
-	public Document getDocument() {
-		return document;
-	}
-	public void setDocument(Document document) {
-		this.document = document;
-		XML_WRITER.setDocument(document);
-		XML_READER.setDocument(document);
-	}
-	public boolean isLock() {
-		return lock;
-	}
-	public void setLock(boolean lock) {
-		this.lock = lock;
-	}
-	public int getIndentAmount() {
-		return indentAmount;
-	}
-	public void setIndentAmount(int indentAmount) {
-		this.indentAmount = indentAmount;
-	}
-	public boolean isAutoFlush() {
-		return autoFlush;
-	}
-	public void setAutoFlush(boolean autoFlush) {
-		this.autoFlush = autoFlush;
-	}
-	public boolean isValidating() {
-		return validating;
-	}
-	public void setValidating(boolean validating) {
-		this.validating = validating;
-	}
-	public boolean isNamespaceAware() {
-		return namespaceAware;
-	}
-	public void setNamespaceAware(boolean namespaceAware) {
-		this.namespaceAware = namespaceAware;
-	}
-	public boolean isFeatValidation() {
-		return featValidation;
-	}
-	public void setFeatValidation(boolean featValidation) {
-		this.featValidation = featValidation;
-	}
-	public boolean isFeatNamespaces() {
-		return featNamespaces;
-	}
-	public void setFeatNamespaces(boolean featNamespaces) {
-		this.featNamespaces = featNamespaces;
-	}
-	public boolean isFeatLoadDTDGramm() {
-		return featLoadDTDGramm;
-	}
-	public void setFeatLoadDTDGramm(boolean featLoadDTDGramm) {
-		this.featLoadDTDGramm = featLoadDTDGramm;
-	}
-	public boolean isFeatLoadExtDTD() {
-		return featLoadExtDTD;
-	}
-	public void setFeatLoadExtDTD(boolean featLoadExtDTD) {
-		this.featLoadExtDTD = featLoadExtDTD;
-	}
-	public void setFilePath(String filePath) {
-		this.filePath = filePath;
-	}
-
-	/* ################################################################################# */
-	/* END GET AND SET */
-	/* ################################################################################# */
-
-	/* ################################################################################# */
 	/* START STATIC METHODS */
 	/* ################################################################################# */
+
+	/**
+	 * method that create a Document
+	 * @param pathFile
+	 * path del file da cui creare il Document
+	 * @return org.w3c.dom.Document
+	 * oggetto che rappresenta documento xml 
+	 * @throws XMLException
+	 * eccezione sollevata se la creazione dell'oggetto Document ritorna errori
+	 */
+	public static Document createDocument(String pathFile) throws XMLException {
+		try {
+			DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+
+			docFactory.setValidating(false);
+			docFactory.setNamespaceAware(false);
+			docFactory.setFeature("http://xml.org/sax/features/validation", false);
+			docFactory.setFeature("http://xml.org/sax/features/namespaces", false);
+			docFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-dtd-grammar", false);
+			docFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+
+			DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+			return docBuilder.parse(pathFile);
+		} catch (ParserConfigurationException | SAXException | IOException e) {
+			throw new XMLException("Unable to work on a XML file.\nError message: " + e.getMessage());
+		}
+	}
+
 
 	/**
 	 * method that create a Document
@@ -236,6 +181,87 @@ public class JSX {
 
 	/* ################################################################################# */
 	/* END STATIC METHODS */
+	/* ################################################################################# */
+
+	/* ################################################################################# */
+	/* START GET AND SET */
+	/* ################################################################################# */
+
+	public String getFilePath() {
+		return filePath;
+	}
+	public void setFilePath(String filePath) {
+		this.filePath = filePath;
+	}
+	public Document getDocument() {
+		return document;
+	}
+	public void setDocument(Document document) {
+		this.document = document;
+		XML_WRITER.setDocument(document);
+		XML_READER.setDocument(document);
+	}
+	public boolean isLock() {
+		return lock;
+	}
+	public void setLock(boolean lock) {
+		this.lock = lock;
+	}
+	public int getIndentAmount() {
+		return indentAmount;
+	}
+	public void setIndentAmount(int indentAmount) {
+		this.indentAmount = indentAmount;
+	}
+	public boolean isAutoFlush() {
+		return autoFlush;
+	}
+	public void setAutoFlush(boolean autoFlush) {
+		this.autoFlush = autoFlush;
+	}
+	public boolean isValidating() {
+		return validating;
+	}
+	public void setValidating(boolean validating) {
+		this.validating = validating;
+	}
+	public boolean isNamespaceAware() {
+		return namespaceAware;
+	}
+	public void setNamespaceAware(boolean namespaceAware) {
+		this.namespaceAware = namespaceAware;
+	}
+	public boolean isFeatValidation() {
+		return featValidation;
+	}
+	public void setFeatValidation(boolean featValidation) {
+		this.featValidation = featValidation;
+	}
+	public boolean isFeatNamespaces() {
+		return featNamespaces;
+	}
+	public void setFeatNamespaces(boolean featNamespaces) {
+		this.featNamespaces = featNamespaces;
+	}
+	public boolean isFeatLoadDTDGramm() {
+		return featLoadDTDGramm;
+	}
+	public void setFeatLoadDTDGramm(boolean featLoadDTDGramm) {
+		this.featLoadDTDGramm = featLoadDTDGramm;
+	}
+	public boolean isFeatLoadExtDTD() {
+		return featLoadExtDTD;
+	}
+	public void setFeatLoadExtDTD(boolean featLoadExtDTD) {
+		this.featLoadExtDTD = featLoadExtDTD;
+	}
+	/* GET LOCK */
+	public ReentrantLock getReentrantLock() {
+		return REENTRANT_LOCK;
+	}
+
+	/* ################################################################################# */
+	/* END GET AND SET */
 	/* ################################################################################# */
 
 	/* ################################################################################# */
@@ -714,11 +740,11 @@ public class JSX {
 				DOMSource source = new DOMSource(document);
 				StreamResult result = new StreamResult(new File(pathFile));
 				transformer.transform(source, result);
-				if (reloadDocument) loadDocument();
 			} catch (TransformerException e) {
 				e.printStackTrace();
 			} finally {
 				tryUnlock();
+				if (reloadDocument) loadDocument();
 			}
 		}
 	}
