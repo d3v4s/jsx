@@ -2,8 +2,8 @@ package jsx;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
@@ -267,26 +267,109 @@ public class JSX {
 	/* ################################################################################# */
 	/* START DOCUMENT WRITER METHODS */
 	/* ################################################################################# */
-	
-	/* metodo che aggiunge elementi con child e mappe per attributi e scrive su pathFile */
+
 	/**
-	 * method that add child element
+	 * method that add element
 	 * @param nameElement
 	 * nome elemento da aggiungere
-	 * @param mapAttributes
+	 * @throws JSXLockException 
+	 */
+	/* metodo che aggiunge un elemento al firstchild con mappa attributi su pathFileName */
+	public void addElement(String nameElement) throws JSXLockException {
+		if (!tryLock()) return;
+
+		XML_WRITER.addElement(nameElement);
+		tryUnlock();
+		autoflush();
+	}
+	
+	/**
+	 * method that add element eith text
+	 * @param nameElement
+	 * nome elemento da aggiungere
+	 * @param textContent
+	 * testo da inserire all'interno del nuovo elemento
+	 * @throws JSXLockException 
+	 */
+	/* metodo che aggiunge un elemento al firstchild con attributo id su pathFileName */
+	public void addElement(String nameElement, String textContent) throws JSXLockException {
+		if (!tryLock()) return;
+
+		XML_WRITER.addElement(nameElement, textContent);
+		tryUnlock();
+		autoflush();
+	}
+
+	/**
+	 * method that add element
+	 * @param nameElement
+	 * nome elemento da aggiungere
+	 * @param attributesMap
+	 * mappa attributi da inserire sul nuovo elemento, da impostare con &lt;chiave, valore&gt;
+	 * @throws JSXLockException 
+	 */
+	/* metodo che aggiunge un elemento al firstchild con mappa attributi su pathFileName */
+	public void addElement(String nameElement, Map<String, String> attributesMap) throws JSXLockException {
+		if (!tryLock()) return;
+
+		XML_WRITER.addElement(nameElement, attributesMap);
+		tryUnlock();
+		autoflush();
+	}
+	
+	/**
+	 * method that add element
+	 * @param nameElement
+	 * nome elemento da aggiungere
+	 * @param idElement
+	 * id da dare all'elemento
+	 * @throws JSXLockException 
+	 */
+	/* metodo che aggiunge un elemento al firstchild con attributo id su pathFileName */
+	public void addElementWithId(String nameElement, String idElement) throws JSXLockException {
+		if (!tryLock()) return;
+
+		XML_WRITER.addElementWithId(nameElement, idElement);
+		tryUnlock();
+		autoflush();
+	}
+
+	/**
+	 * method that add child element with child
+	 * @param nameElement
+	 * nome elemento da aggiungere
+	 * @param idElement
+	 * id da dare all'elemento
+	 * @param mapChildNode
+	 * mappa elementi figli del nuovo elemento, da impostare con &lt;nome_elemento, test_interno_tag&gt;
+	 * @throws JSXLockException 
+	 */
+	/* metodo che aggiunge elementi con child, setta attributo id e scrive su Document */
+	public void addElementWithChild(String nameElement, String idElement, Map<String, String> mapChildNode) throws JSXLockException {
+		if (!tryLock()) return;
+
+		XML_WRITER.addElementWithChild(nameElement, idElement, mapChildNode);
+		tryUnlock();
+		autoflush();
+	}
+
+	/**
+	 * method that add child element with child
+	 * @param nameElement
+	 * nome elemento da aggiungere
+	 * @param attributesMap
 	 * mappa attributi da inserire sul nuovo elemento, da impostare con &lt;chiave, valore&gt;
 	 * @param mapChildNode
 	 * mappa elementi figli del nuovo elemento, da impostare con &lt;nome_elemento, test_interno_tag&gt;
-	 * @param mapAttributesChild
-	 * mappa attributi degli elementi figli, da impostare con &lt;nome_elemento, &lt;chiave, valore&gt;&gt;
 	 * @throws JSXLockException 
 	 */
-	public void addElementWithChild(String nameElement, HashMap<String, String> mapAttributes, HashMap<String, String> mapChildNode, HashMap<String, HashMap<String, String>> mapAttributesChild) throws JSXLockException {
-		if (tryLock()) {
-			XML_WRITER.addElementWithChild(nameElement, mapAttributes, mapChildNode, mapAttributesChild);
-			tryUnlock();
-			if (autoFlush) flush(filePath, true);
-		}
+	/* metodo che aggiunge elementi con child e mappe per attributi e scrive su pathFile */
+	public void addElementWithChild(String nameElement, Map<String, String> attributesMap, Map<String, String> mapChildNode) throws JSXLockException {
+		if (!tryLock()) return;
+
+		XML_WRITER.addElementWithChild(nameElement, attributesMap, mapChildNode);
+		tryUnlock();
+		autoflush();
 	}
 
 	/**
@@ -302,69 +385,52 @@ public class JSX {
 	 * @throws JSXLockException 
 	 */
 	/* metodo che aggiunge elementi con child, setta attributo id e scrive su pathFile */
-	public void addElementWithChild(String nameElement, String idElement, HashMap<String, String> mapChildNode, HashMap<String, String> mapIdChild) throws JSXLockException {
-		if (tryLock()) {
-			XML_WRITER.addElementWithChild(nameElement, idElement, mapChildNode, mapIdChild);
-			tryUnlock();
-			if (autoFlush) flush(filePath, true);
-		}
+	public void addElementWithChild(String nameElement, String idElement, Map<String, String> mapChildNode, Map<String, String> mapIdChild) throws JSXLockException {
+		if (!tryLock()) return;
+
+		XML_WRITER.addElementWithChild(nameElement, idElement, mapChildNode, mapIdChild);
+		tryUnlock();
+		autoflush();
 	}
 
-	
+	/* metodo che aggiunge elementi con child e mappe per attributi e scrive su pathFile */
 	/**
-	 * method that add element
+	 * method that add child element
 	 * @param nameElement
 	 * nome elemento da aggiungere
-	 * @param mapAttributes
+	 * @param attributesMap
 	 * mappa attributi da inserire sul nuovo elemento, da impostare con &lt;chiave, valore&gt;
+	 * @param mapChildNode
+	 * mappa elementi figli del nuovo elemento, da impostare con &lt;nome_elemento, test_interno_tag&gt;
+	 * @param attributesMapChild
+	 * mappa attributi degli elementi figli, da impostare con &lt;nome_elemento, &lt;chiave, valore&gt;&gt;
 	 * @throws JSXLockException 
 	 */
-	/* metodo che aggiunge un elemento al firstchild con mappa attributi su pathFileName */
-	public void addElement(String nameElement, HashMap<String, String> mapAttributes) throws JSXLockException {
-		if (tryLock()) {
-			XML_WRITER.addElement(nameElement, mapAttributes);
-			tryUnlock();
-			if (autoFlush) flush(filePath, true);
-		}
+	public void addElementWithChild(String nameElement, Map<String, String> attributesMap, Map<String, String> mapChildNode, Map<String, Map<String, String>> attributesMapChild) throws JSXLockException {
+		if (!tryLock()) return;
+
+		XML_WRITER.addElementWithChild(nameElement, attributesMap, mapChildNode, attributesMapChild);
+		tryUnlock();
+		autoflush();
 	}
-	
-	/**
-	 * method that add element
-	 * @param nameElement
-	 * nome elemento da aggiungere
-	 * @param idElement
-	 * id da dare all'elemento
-	 * @throws JSXLockException 
-	 */
-	/* metodo che aggiunge un elemento al firstchild con attributo id su pathFileName */
-	public void addElement(String nameElement, String idElement) throws JSXLockException {
-		if (tryLock()) {
-			XML_WRITER.addElement(nameElement, idElement);
-			tryUnlock();
-			if (autoFlush) flush(filePath, true);
-		}
-	}
-	
-	
+
 	/**
 	 * method that add child element
 	 * @param parentNode
 	 * nodo in cui inserire il nuovo elemento
 	 * @param nameElement
 	 * nome elemento da aggiungere
-	 * @param mapAttributes
-	 * mappa attributi da inserire sul nuovo elemento, da impostare con &lt;chiave, valore&gt;
-	 * @param textContext
+	 * @param textContent
 	 * testo da inserire all'interno del nuovo elemento
 	 * @throws JSXLockException 
 	 */
 	/* metodo che aggiunge un elemento figlio al node con mappe attributi */
-	public void addChildElement(Node parentNode, String nameElement, HashMap<String, String> mapAttributes, String textContext) throws JSXLockException {
-		if (tryLock()) {
-			XML_WRITER.addChildElement(parentNode, nameElement, mapAttributes, textContext);
-			tryUnlock();
-			if (autoFlush) flush(filePath, true);
-		}
+	public void appendElement(Node parentNode, String nameElement, String textContext) throws JSXLockException {
+		if (!tryLock()) return;
+
+		XML_WRITER.appendElement(parentNode, nameElement, textContext);
+		tryUnlock();
+		autoflush();
 	}
 
 	/**
@@ -380,84 +446,13 @@ public class JSX {
 	 * @throws JSXLockException 
 	 */
 	/* metodo che aggiunge un elemento figlio al node con id */
-	public void addChildElement(Node parentNode, String nameElement, String idElement, String textContext) throws JSXLockException {
-		if (tryLock()) {
-			XML_WRITER.addChildElement(parentNode, nameElement, idElement, textContext);
-			tryUnlock();
-			if (autoFlush) flush(filePath, true);
-		}
-	}
+	public void appendElement(Node parentNode, String nameElement, String idElement, String textContext) throws JSXLockException {
+		if (!tryLock()) return;
 
-	/**
-	 * method that add child element with child
-	 * @param nameElement
-	 * nome elemento da aggiungere
-	 * @param mapAttributes
-	 * mappa attributi da inserire sul nuovo elemento, da impostare con &lt;chiave, valore&gt;
-	 * @param mapChildNode
-	 * mappa elementi figli del nuovo elemento, da impostare con &lt;nome_elemento, test_interno_tag&gt;
-	 * @throws JSXLockException 
-	 */
-	/* metodo che aggiunge elementi con child e mappe per attributi e scrive su pathFile */
-	public void addElementWithChild(String nameElement, HashMap<String, String> mapAttributes, HashMap<String, String> mapChildNode) throws JSXLockException {
-		if (tryLock()) {
-			XML_WRITER.addElementWithChild(nameElement, mapAttributes, mapChildNode);
-			tryUnlock();
-			if (autoFlush) flush(filePath, true);
-		}
+		XML_WRITER.appendElement(parentNode, nameElement, idElement, textContext);
+		tryUnlock();
+		autoflush();
 	}
-
-	/**
-	 * method that add child element with child
-	 * @param nameElement
-	 * nome elemento da aggiungere
-	 * @param idElement
-	 * id da dare all'elemento
-	 * @param mapChildNode
-	 * mappa elementi figli del nuovo elemento, da impostare con &lt;nome_elemento, test_interno_tag&gt;
-	 * @throws JSXLockException 
-	 */
-	/* metodo che aggiunge elementi con child, setta attributo id e scrive su Document */
-	public void addElementWithChild(String nameElement, String idElement, HashMap<String, String> mapChildNode) throws JSXLockException {
-		if (tryLock()) {
-			XML_WRITER.addElementWithChild(nameElement, idElement, mapChildNode);
-			tryUnlock();
-			if (autoFlush) flush(filePath, true);
-		}
-	}
-	
-	/**
-	 * method that add element
-	 * @param nameElement
-	 * nome elemento da aggiungere
-	 * @throws JSXLockException 
-	 */
-	/* metodo che aggiunge un elemento al firstchild con mappa attributi su pathFileName */
-	public void addElement(String nameElement) throws JSXLockException {
-		if (tryLock()) {
-			XML_WRITER.addElement(nameElement);
-			tryUnlock();
-			if (autoFlush) flush(filePath, true);
-		}
-	}
-	
-	/**
-	 * method that add element eith text
-	 * @param nameElement
-	 * nome elemento da aggiungere
-	 * @param textContent
-	 * testo da inserire all'interno del nuovo elemento
-	 * @throws JSXLockException 
-	 */
-	/* metodo che aggiunge un elemento al firstchild con attributo id su pathFileName */
-	public void addElementText(String nameElement, String textContent) throws JSXLockException {
-		if (tryLock()) {
-			XML_WRITER.addElementText(nameElement, textContent);
-			tryUnlock();
-			if (autoFlush) flush(filePath, true);
-		}
-	}
-	
 
 	/**
 	 * method that add child element
@@ -465,32 +460,34 @@ public class JSX {
 	 * nodo in cui inserire il nuovo elemento
 	 * @param nameElement
 	 * nome elemento da aggiungere
-	 * @param textContent
+	 * @param attributesMap
+	 * mappa attributi da inserire sul nuovo elemento, da impostare con &lt;chiave, valore&gt;
+	 * @param textContext
 	 * testo da inserire all'interno del nuovo elemento
 	 * @throws JSXLockException 
 	 */
 	/* metodo che aggiunge un elemento figlio al node con mappe attributi */
-	public void addChildElement(Node parentNode, String nameElement, String textContext) throws JSXLockException {
-		if (tryLock()) {
-			XML_WRITER.addChildElement(parentNode, nameElement, textContext);
-			tryUnlock();
-			if (autoFlush) flush(filePath, true);
-		}
+	public void appendElement(Node parentNode, String nameElement, Map<String, String> attributesMap, String textContext) throws JSXLockException {
+		if (!tryLock()) return;
+
+		XML_WRITER.appendElement(parentNode, nameElement, attributesMap, textContext);
+		tryUnlock();
+		autoflush();
 	}
 
 	/**
 	 * method that append element with child on node
-	 * @param node parent
+	 * @param parentNode parent
 	 * @param nameElement
 	 * @param mapChildNode element child
 	 * @throws JSXLockException
 	 */
-	public void appendElementWithChild(Node node, String nameElement, HashMap<String, String> mapChildNode) throws JSXLockException {
-		if (tryLock()) {
-			XML_WRITER.appendElementWithChild(node, nameElement, mapChildNode);
-			tryUnlock();
-			if (autoFlush) flush(filePath, true);
-		}
+	public void appendElementWithChild(Node parentNode, String nameElement, Map<String, String> mapChildNode) throws JSXLockException {
+		if (!tryLock()) return;
+
+		XML_WRITER.appendElementWithChild(parentNode, nameElement, mapChildNode);
+		tryUnlock();
+		autoflush();
 	}
 
 	/**
@@ -502,11 +499,11 @@ public class JSX {
 	 * @throws JSXLockException 
 	 */
 	public void deleteNode(String nameElement, String id) throws JSXLockException {
-		if (tryLock()) {
-			XML_WRITER.deleteNode(nameElement, id);
-			tryUnlock();
-			if (autoFlush) flush(filePath, true);
-		}
+		if (!tryLock()) return;
+
+		XML_WRITER.deleteNode(nameElement, id);
+		tryUnlock();
+		autoflush();
 	}
 
 	/**
@@ -516,11 +513,11 @@ public class JSX {
 	 * @throws JSXLockException 
 	 */
 	public void deleteNode(Node node) throws JSXLockException {
-		if (tryLock()) {
-			XML_WRITER.deleteNode(node);
-			tryUnlock();
-			if (autoFlush) flush(filePath, true);
-		}
+		if (!tryLock()) return;
+
+		XML_WRITER.deleteNode(node);
+		tryUnlock();
+		autoflush();
 	}
 
 	/**
@@ -529,15 +526,15 @@ public class JSX {
 	 * @throws JSXLockException 
 	 */
 	public void removeBlankLines() throws JSXLockException {
-		if (tryLock()) {
-			try {
-				removeBlankLines(document);
-				if (autoFlush) flush(filePath, true);
-			} catch (JSXException e) {
-				e.printStackTrace();
-			} finally {
-				tryUnlock();
-			}
+		if (!tryLock()) return;
+
+		try {
+			removeBlankLines(document);
+			autoflush();
+		} catch (JSXException e) {
+			e.printStackTrace();
+		} finally {
+			tryUnlock();
 		}
 	}
 
@@ -553,17 +550,16 @@ public class JSX {
 	 * method that get array of elements
 	 * @param nameElements
 	 * nome elementi da inserire nella lista
-	 * @return ArrayList&lt;Node&gt;
+	 * @return List&lt;Node&gt;
 	 * lista di nodi
 	 * @throws JSXLockException 
 	 */
 	/* metodo che ritorna lista di elementi con filtro nome */
-	public ArrayList<Node> getArrayElements(String nameElements) throws JSXLockException {
-		ArrayList<Node> nodeList = null;
-		if (tryLock()) {
-			XML_READER.getArrayElements(nameElements);
-			tryUnlock();
-		}
+	public List<Node> getArrayElements(String nameElements) throws JSXLockException {
+		if (!tryLock()) return null;
+
+		List<Node> nodeList = XML_READER.getArrayElements(nameElements);
+		tryUnlock();
 		return nodeList;
 	}
 
@@ -571,17 +567,16 @@ public class JSX {
 	 * method that add map id to element
 	 * @param nameElements
 	 * nome elementi da inserire nella lista
-	 * @return HashMap&lt;String, Node&gt;
+	 * @return Map&lt;String, Node&gt;
 	 * mappa con &lt;id, nodo&gt;
 	 * @throws JSXLockException 
 	 * 
 	 */
-	public HashMap<String, Node> getMapIdElement(String nameElements) throws JSXLockException {
-		HashMap<String, Node> nodeMap = null;
-		if (tryLock()) {
-			nodeMap = XML_READER.getMapIdElement(nameElements);
-			tryUnlock();
-		}
+	public Map<String, Node> getMapIdElement(String nameElements) throws JSXLockException {
+		if (!tryLock()) return null;
+
+		Map<String, Node> nodeMap = XML_READER.getMapIdElement(nameElements);
+		tryUnlock();
 		return nodeMap;
 	}
 
@@ -597,11 +592,10 @@ public class JSX {
 	 */
 	/* metodo che ritorna lista di elementi con filtro nome e id */
 	public Node getElementById(String nameElement, String idElement) throws JSXLockException {
-		Node node = null;
-		if (tryLock()) {
-			node = XML_READER.getElementById(nameElement, idElement);
-			tryUnlock();
-		}
+		if (!tryLock()) return null;
+
+		Node node = XML_READER.getElementById(nameElement, idElement);
+		tryUnlock();
 		return node;
 	}
 
@@ -609,17 +603,16 @@ public class JSX {
 	 * method that get array of child node
 	 * @param parentNode
 	 * nodo genitore
-	 * @return ArrayList&lt;Node&gt;
+	 * @return List&lt;Node&gt;
 	 * lista con tutti gli elementi figli di parentNode
 	 * @throws JSXLockException 
 	 */
 	/* metodo che ritorna lista di elementi figli */
-	public ArrayList<Node> getArrayChildNode(Node parentNode) throws JSXLockException {
-		ArrayList<Node> nodeList = null;
-		if (tryLock()) {
-			nodeList = XML_READER.getArrayChildNode(parentNode);
-			tryUnlock();
-		}
+	public List<Node> getArrayChildNode(Node parentNode) throws JSXLockException {
+		if (!tryLock()) return null;
+
+		List<Node> nodeList = XML_READER.getArrayChildNode(parentNode);
+		tryUnlock();
 		return nodeList;
 	}
 
@@ -629,17 +622,16 @@ public class JSX {
 	 * nodo genitore
 	 * @param nameElements
 	 * nome elementi da inserire nella lista
-	 * @return ArrayList&lt;Node&gt;
+	 * @return List&lt;Node&gt;
 	 * lista con elementi figli che corrispondono al nome
 	 * @throws JSXLockException 
 	 */
 	/* metodo che ritorna lista di elementi figli con filtro nome */
-	public ArrayList<Node> getArrayChildNode(Node parentNode, String nameElements) throws JSXLockException {
-		ArrayList<Node> nodeList = null;
-		if (tryLock()) {
-			nodeList = XML_READER.getArrayChildNode(parentNode, nameElements);
-			tryUnlock();
-		}
+	public List<Node> getArrayChildNode(Node parentNode, String nameElements) throws JSXLockException {
+		if (!tryLock()) return null;
+
+		List<Node> nodeList = XML_READER.getArrayChildNode(parentNode, nameElements);
+		tryUnlock();
 		return nodeList;
 	}
 
@@ -657,11 +649,10 @@ public class JSX {
 	 */
 	/* metodo che ritorna un elemento figlo con filtro nome e id */
 	public Node getChildNodeById(Node parentNode, String nameElements, String idElement) throws JSXLockException {
-		Node node = null;
-		if (tryLock()) {
-			node = XML_READER.getChildNodeById(parentNode, nameElements, idElement);
-			tryUnlock();
-		}
+		if (!tryLock()) return null;
+
+		Node node = XML_READER.getChildNodeById(parentNode, nameElements, idElement);
+		tryUnlock();
 		return node;
 	}
 
@@ -671,17 +662,16 @@ public class JSX {
 	 * nodo genitore
 	 * @param nameElements
 	 * nome elementi da inserire nella lista
-	 * @return HashMap&lt;String, Node&gt;
+	 * @return Map&lt;String, Node&gt;
 	 * mappa con elementi figli &lt;id, nodo&gt;
 	 * @throws JSXLockException 
 	 */
 	/* metodo che ritorna mappa di id con nodi child con key id */
-	public HashMap<String, Node> getMapIdChildNode(Node parentNode, String nameElement) throws JSXLockException {
-		HashMap<String, Node> map = null;
-		if (tryLock()) {
-			map = XML_READER.getMapIdChildNode(parentNode, nameElement);
-			tryUnlock();
-		}
+	public Map<String, Node> getMapIdChildNode(Node parentNode, String nameElement) throws JSXLockException {
+		if (!tryLock()) return null;
+
+		Map<String, Node> map = XML_READER.getMapIdChildNode(parentNode, nameElement);
+		tryUnlock();
 		return map;
 	}
 
@@ -728,24 +718,24 @@ public class JSX {
 	 */
 	/* salva modifiche nel file xml */
 	public void flush(String pathFile, boolean reloadDocument) throws JSXLockException {
-		if (tryLock()) {
-			try {
-				TransformerFactory transformerFactory = TransformerFactory.newInstance();
-				Transformer transformer = transformerFactory.newTransformer();
-				if (indentAmount > 0) {
-					removeBlankLines();
-					transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-					transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", String.valueOf(indentAmount));
-				}
-				DOMSource source = new DOMSource(document);
-				StreamResult result = new StreamResult(new File(pathFile));
-				transformer.transform(source, result);
-			} catch (TransformerException e) {
-				e.printStackTrace();
-			} finally {
-				tryUnlock();
-				if (reloadDocument) loadDocument();
+		if (!tryLock()) return;
+
+		try {
+			TransformerFactory transformerFactory = TransformerFactory.newInstance();
+			Transformer transformer = transformerFactory.newTransformer();
+			if (indentAmount > 0) {
+				removeBlankLines();
+				transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+				transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", String.valueOf(indentAmount));
 			}
+			DOMSource source = new DOMSource(document);
+			StreamResult result = new StreamResult(new File(pathFile));
+			transformer.transform(source, result);
+		} catch (TransformerException e) {
+			e.printStackTrace();
+		} finally {
+			tryUnlock();
+			if (reloadDocument) loadDocument();
 		}
 	}
 
@@ -754,16 +744,24 @@ public class JSX {
 	 * @throws JSXLockException 
 	 */
 	public void loadDocument() throws JSXLockException {
-		if (tryLock()) {
-			try {
-				document = createDocument(filePath, validating, namespaceAware, featValidation, featNamespaces, featLoadDTDGramm, featLoadExtDTD);
-				XML_WRITER.setDocument(document);
-				XML_READER.setDocument(document);
-			} catch (XMLException e) {
-				e.printStackTrace();
-			} finally {
-				tryUnlock();
-			}
+		if (!tryLock()) return;
+
+		try {
+			document = createDocument(filePath, validating, namespaceAware, featValidation, featNamespaces, featLoadDTDGramm, featLoadExtDTD);
+			XML_WRITER.setDocument(document);
+			XML_READER.setDocument(document);
+		} catch (XMLException e) {
+			e.printStackTrace();
+		} finally {
+			tryUnlock();
 		}
+	}
+
+	/**
+	 * method to autoflush the document
+	 * @throws JSXLockException 
+	 */
+	private void autoflush() throws JSXLockException {
+		if (autoFlush) flush(filePath, true);
 	}
 }
