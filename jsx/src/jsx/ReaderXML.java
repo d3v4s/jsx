@@ -2,6 +2,8 @@ package jsx;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -41,7 +43,7 @@ public class ReaderXML {
 	 * @return
 	 */
 	/* metodo che ritorna lista di elementi con filtro nome */
-	protected ArrayList<Node> getArrayElements(String nameElements) {
+	protected List<Node> getNodeList(String nameElements) {
 		ArrayList<Node> listElements = new ArrayList<Node>();
 		NodeList nodeList = document.getElementsByTagName(nameElements);
 		for (int i = 0, length = nodeList.getLength(); i < length; i++) listElements.add(nodeList.item(i));
@@ -56,8 +58,8 @@ public class ReaderXML {
 	 * @return
 	 */
 	/* metodo che ritorna lista di elementi con filtro nome e id */
-	protected Node getElementById(String nameElement, String idElement) {
-		ArrayList<Node> listElements = getArrayElements(nameElement);
+	protected Node getNodeById(String nameElement, String idElement) {
+		List<Node> listElements = getNodeList(nameElement);
 		for (Node node : listElements) if (node.getNodeName().equals(nameElement) && node.getAttributes().getNamedItem("id").getTextContent().equals(idElement)) return node;
 		return null;
 	}
@@ -69,9 +71,9 @@ public class ReaderXML {
 	 * @return
 	 */
 	/* metodo che ritorna mappa di nodi con key id */
-	protected HashMap<String, Node> getMapIdElement(String nameElements) {
+	protected Map<String, Node> getIdNodeMap(String nameElements) {
 		HashMap<String, Node> mapElement = new HashMap<String, Node>();
-		ArrayList<Node> listElement = getArrayElements(nameElements);
+		List<Node> listElement = getNodeList(nameElements);
 		for (Node node : listElement)mapElement.put(node.getAttributes().getNamedItem("id").getTextContent(), node);
 		return mapElement;
 	}
@@ -82,10 +84,10 @@ public class ReaderXML {
 	 * @return
 	 */
 	/* metodo che ritorna lista di elementi figli */
-	protected ArrayList<Node> getArrayChildNode(Node parentNode) {
+	protected List<Node> getChildNodeList(Node parentNode) {
 		ArrayList<Node> listElements = new ArrayList<Node>();
 		NodeList nodeList = parentNode.getChildNodes();
-		for(int i = 0, length = nodeList.getLength(); i < length; i++) if (!nodeList.item(i).getNodeName().equals("#text")) listElements.add(nodeList.item(i));
+		for (int i = 0, length = nodeList.getLength(); i < length; i++) if (!nodeList.item(i).getNodeName().equals("#text")) listElements.add(nodeList.item(i));
 		return listElements;
 	}
 
@@ -96,9 +98,9 @@ public class ReaderXML {
 	 * @return
 	 */
 	/* metodo che ritorna lista di elementi figli con filtro nome */
-	protected ArrayList<Node> getArrayChildNode(Node parentNode, String nameNode) {
+	protected List<Node> getChildNodeList(Node parentNode, String nameNode) {
 		ArrayList<Node> listNode = new ArrayList<Node>();
-		ArrayList<Node> nodeList = getArrayChildNode(parentNode);
+		List<Node> nodeList = getChildNodeList(parentNode);
 		for (Node node : nodeList) if (node.getNodeName().equals(nameNode)) listNode.add(node);
 		return listNode;
 	}
@@ -112,7 +114,7 @@ public class ReaderXML {
 	 */
 	/* metodo che ritorna un elemento figlo con filtro nome e id */
 	protected Node getChildNodeById(Node parentNode, String nameNode, String idElement) {
-		ArrayList<Node> nodelist = getArrayChildNode(parentNode);
+		List<Node> nodelist = getChildNodeList(parentNode);
 		for (Node node : nodelist) if (node.getNodeName().equals(nameNode) && node.getAttributes().getNamedItem("id").getTextContent().equals(idElement)) return node;
 		return null;
 	}
@@ -124,9 +126,9 @@ public class ReaderXML {
 	 * @return
 	 */
 	/* metodo che ritorna mappa di id con nodi child con key id */
-	protected HashMap<String, Node> getMapIdChildNode(Node parentNode, String nameElement) {
+	protected Map<String, Node> getIdChildNodeMap(Node parentNode, String nameElement) {
 		HashMap<String, Node> mapChildNode = new HashMap<String, Node>();
-		ArrayList<Node> listNode = getArrayChildNode(parentNode, nameElement);
+		List<Node> listNode = getChildNodeList(parentNode, nameElement);
 		for (Node node : listNode) mapChildNode.put(node.getAttributes().getNamedItem("id").getTextContent(), node);
 		return mapChildNode;
 	}

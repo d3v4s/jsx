@@ -1,6 +1,7 @@
 package jsx;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 import org.w3c.dom.Document;
@@ -23,10 +24,10 @@ public class WriterXML {
 	/* START GET AND SET */
 	/* ################################################################################# */
 
-	public Document getDocument() {
+	protected Document getDocument() {
 		return document;
 	}
-	public void setDocument(Document document) {
+	protected void setDocument(Document document) {
 		this.document = document;
 	}
 
@@ -43,7 +44,7 @@ public class WriterXML {
 	 * @param mapAttributesChild
 	 */
 	/* metodo che aggiunge elementi con child e mappe per attributi e scrive su Document */
-	protected void addElementWithChild(String nameElement, HashMap<String, String> mapAttributes, HashMap<String, String> mapChildNode, HashMap<String, HashMap<String, String>> mapAttributesChild) {
+	protected void addElementWithChild(String nameElement, Map<String, String> mapAttributes, Map<String, String> mapChildNode, Map<String, Map<String, String>> mapAttributesChild) {
 		Element el = document.createElement(nameElement);
 		Set<String> setAttr = mapAttributes.keySet();
 		for (String attr : setAttr) el.setAttribute(attr, mapAttributes.get(attr));
@@ -72,11 +73,11 @@ public class WriterXML {
 	 * @param mapIdChild
 	 */
 	/* metodo che aggiunge elementi con child, setta attributo id e scrive su Document */
-	protected void addElementWithChild(String nameElement, String idElement, HashMap<String, String> mapChildNode, HashMap<String, String> mapIdChild) {
+	protected void addElementWithChild(String nameElement, String idElement, Map<String, String> mapChildNode, Map<String, String> mapIdChild) {
 		HashMap<String, String> mapAttributes = new HashMap<String, String>();
 		mapAttributes.put("id", idElement);
 		Set<String> setKChldNd = mapChildNode.keySet();
-		HashMap<String, HashMap<String, String>> mapAttributesChild = new HashMap<String, HashMap<String,String>>();
+		Map<String, Map<String, String>> mapAttributesChild = new HashMap<String, Map<String,String>>();
 		HashMap<String, String> mapId;
 		for (String kChldNd : setKChldNd) {
 			mapId = new HashMap<String, String>();
@@ -93,7 +94,7 @@ public class WriterXML {
 	 * @param mapAttributes
 	 */
 	/* metodo che aggiunge un elemento al firstchild con mappa attributi su Document */
-	protected void addElement(String nameElement, HashMap<String, String> mapAttributes) {
+	protected void addElement(String nameElement, Map<String, String> mapAttributes) {
 		Element el = document.createElement(nameElement);
 		Set<String> setAttr = mapAttributes.keySet();
 		for (String attr : setAttr) el.setAttribute(attr, mapAttributes.get(attr));
@@ -107,7 +108,7 @@ public class WriterXML {
 	 * @param idElement
 	 */
 	/* metodo che aggiunge un elemento al firstchild con attributo id su Document */
-	protected void addElement(String nameElement, String idElement) {
+	protected void addElementWithId(String nameElement, String idElement) {
 		HashMap<String, String> mapAttributes = new HashMap<String, String>();
 		mapAttributes.put("id", idElement);
 		addElement(nameElement, mapAttributes);
@@ -120,7 +121,7 @@ public class WriterXML {
 	 * @param mapChildNode
 	 */
 	/* metodo che aggiunge elementi con child e mappe per attributi e scrive su Document */
-	protected void addElementWithChild(String nameElement, HashMap<String, String> mapAttributes, HashMap<String, String> mapChildNode) {
+	protected void addElementWithChild(String nameElement, Map<String, String> mapAttributes, Map<String, String> mapChildNode) {
 		Element el = document.createElement(nameElement);
 		Set<String> setAttr = mapAttributes.keySet();
 		for (String attr : setAttr) el.setAttribute(attr, mapAttributes.get(attr));
@@ -144,7 +145,7 @@ public class WriterXML {
 	 * @param mapChildNode
 	 */
 	/* metodo che aggiunge elementi con child, setta attributo id e scrive su Document */
-	protected void addElementWithChild(String nameElement, String idElement, HashMap<String, String> mapChildNode) {
+	protected void addElementWithChild(String nameElement, String idElement, Map<String, String> mapChildNode) {
 		HashMap<String, String> mapAttributes = new HashMap<String, String>();
 		mapAttributes.put("id", idElement);
 		addElementWithChild(nameElement, mapAttributes, mapChildNode);
@@ -168,7 +169,7 @@ public class WriterXML {
 	 * @param textContent
 	 */
 	/* metodo che aggiunge un elemento al firstchild con attributo id su Document */
-	protected void addElementText(String nameElement, String textContent) {
+	protected void addElement(String nameElement, String textContent) {
 		Element el = document.createElement(nameElement);
 		el.setTextContent(textContent);
 		document.getFirstChild().appendChild(el);
@@ -182,7 +183,7 @@ public class WriterXML {
 	 * @param textContext
 	 */
 	/* metodo che aggiunge un elemento figlio al node con mappe attributi */
-	protected void addChildElement(Node parentNode, String nameElement, HashMap<String, String> mapAttributes, String textContext) {
+	protected void appendElement(Node parentNode, String nameElement, Map<String, String> mapAttributes, String textContext) {
 		Element el = parentNode.getOwnerDocument().createElement(nameElement);
 		Set<String> setAttr = mapAttributes.keySet();
 		for (String attr : setAttr) el.setAttribute(attr, mapAttributes.get(attr));
@@ -198,10 +199,10 @@ public class WriterXML {
 	 * @param textContext
 	 */
 	/* metodo che aggiunge un elemento figlio al node con id */
-	protected void addChildElement(Node parentNode, String nameElement, String idElement, String textContext) {
+	protected void appendElement(Node parentNode, String nameElement, String idElement, String textContext) {
 		HashMap<String, String> mapAttributes = new HashMap<String, String>();
 		mapAttributes.put("id", idElement);
-		addChildElement(parentNode, nameElement, mapAttributes, textContext);
+		appendElement(parentNode, nameElement, mapAttributes, textContext);
 	}
 
 	/**
@@ -211,7 +212,7 @@ public class WriterXML {
 	 * @param textContext
 	 */
 	/* metodo che aggiunge un elemento figlio al node con mappe attributi */
-	protected void addChildElement(Node parentNode, String nameElement, String textContext) {
+	protected void appendElement(Node parentNode, String nameElement, String textContext) {
 		Element el = parentNode.getOwnerDocument().createElement(nameElement);
 		el.setTextContent(textContext);
 		parentNode.appendChild(el);
@@ -223,7 +224,7 @@ public class WriterXML {
 	 * @param nameElement
 	 * @param mapChildNode
 	 */
-	protected void appendElementWithChild(Node node, String nameElement, HashMap<String, String> mapChildNode) {
+	protected void appendElementWithChild(Node node, String nameElement, Map<String, String> mapChildNode) {
 		Element el = document.createElement(nameElement);
 
 		Set<String> setChild = mapChildNode.keySet();
@@ -246,7 +247,7 @@ public class WriterXML {
 	protected void deleteNode(String nameElement, String id) {
 		ReaderXML readerXML = new ReaderXML();
 		readerXML.setDocument(document);
-		Node node = readerXML.getMapIdElement(nameElement).get(id);
+		Node node = readerXML.getIdNodeMap(nameElement).get(id);
 		node.getParentNode().removeChild(node);
 	}
 
