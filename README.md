@@ -1,4 +1,7 @@
-# Jsx
-Java Library -- Simple Editor Parser for XML
+# JSX
+Simple editor and parser for XML
 
-Libreria Java per semplificare la lettura, modifica e creazione di un file XML.
+Java library to simplify the reading, editing and creation of an XML file.
+
+Downoload [~releases~](https://github.com/d3v4s/jsx/releases).  
+Read the [wiki](https://github.com/d3v4s/jsx/wiki).
