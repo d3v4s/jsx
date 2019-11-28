@@ -87,7 +87,7 @@ public class ReaderXML {
 	protected List<Node> getArrayChildNode(Node parentNode) {
 		ArrayList<Node> listElements = new ArrayList<Node>();
 		NodeList nodeList = parentNode.getChildNodes();
-		for(int i = 0, length = nodeList.getLength(); i < length; i++) if (!nodeList.item(i).getNodeName().equals("#text")) listElements.add(nodeList.item(i));
+		for (int i = 0, length = nodeList.getLength(); i < length; i++) if (!nodeList.item(i).getNodeName().equals("#text")) listElements.add(nodeList.item(i));
 		return listElements;
 	}
 
