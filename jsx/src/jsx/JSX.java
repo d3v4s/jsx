@@ -2,6 +2,7 @@ package jsx;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.MessageFormat;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -36,6 +37,7 @@ import exception.XMLException;
  *
  */
 public class JSX {
+	private final static String UNBL_WORK_XML_MSGFRMT = "Unable to work on a XML file.\nError message: {0}";
 	private final ReentrantLock REENTRANT_LOCK = new ReentrantLock();
 	private final WriterXML XML_WRITER = new WriterXML();
 	private final ReaderXML XML_READER = new ReaderXML();
@@ -44,6 +46,7 @@ public class JSX {
 	private boolean featValidation = false;
 	private boolean featNamespaces = false;
 	private boolean featLoadExtDTD = false;
+	private boolean prettyOutput = true;
 	private boolean validating = false;
 	private boolean autoFlush = false;
 	private boolean lock = false;
@@ -110,7 +113,7 @@ public class JSX {
 			DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
 			return docBuilder.parse(pathFile);
 		} catch (ParserConfigurationException | SAXException | IOException e) {
-			throw new XMLException("Unable to work on a XML file.\nError message: " + e.getMessage());
+			throw new XMLException(MessageFormat.format(UNBL_WORK_XML_MSGFRMT, e.getMessage()));
 		}
 	}
 
@@ -138,7 +141,7 @@ public class JSX {
 			DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
 			return docBuilder.parse(pathFile);
 		} catch (ParserConfigurationException | SAXException | IOException e) {
-			throw new XMLException("Unable to work on a XML file.\nError message: " + e.getMessage());
+			throw new XMLException(MessageFormat.format(UNBL_WORK_XML_MSGFRMT, e.getMessage()));
 		}
 	}
 
@@ -175,7 +178,7 @@ public class JSX {
 				node.getParentNode().removeChild(node);
 			}
 		} catch (Exception e) {
-			throw new JSXException("Error while deleting blank lines.\nError message: " + e.getMessage());
+			throw new JSXException(MessageFormat.format("Error while deleting blank lines.\nError message: {0}", e.getMessage()));
 		}
 	}
 
@@ -254,6 +257,12 @@ public class JSX {
 	}
 	public void setFeatLoadExtDTD(boolean featLoadExtDTD) {
 		this.featLoadExtDTD = featLoadExtDTD;
+	}
+	public boolean isPrettyOutput() {
+		return prettyOutput;
+	}
+	public void setPrettyOutput(boolean prettyOutput) {
+		this.prettyOutput = prettyOutput;
 	}
 	/* GET LOCK */
 	public ReentrantLock getReentrantLock() {
@@ -530,11 +539,11 @@ public class JSX {
 
 		try {
 			removeBlankLines(document);
-			autoflush();
 		} catch (JSXException e) {
 			e.printStackTrace();
 		} finally {
 			tryUnlock();
+			autoflush();
 		}
 	}
 
@@ -555,10 +564,10 @@ public class JSX {
 	 * @throws JSXLockException 
 	 */
 	/* metodo che ritorna lista di elementi con filtro nome */
-	public List<Node> getArrayElements(String nameElements) throws JSXLockException {
+	public List<Node> getNodeList(String nameElements) throws JSXLockException {
 		if (!tryLock()) return null;
 
-		List<Node> nodeList = XML_READER.getArrayElements(nameElements);
+		List<Node> nodeList = XML_READER.getNodeList(nameElements);
 		tryUnlock();
 		return nodeList;
 	}
@@ -572,10 +581,10 @@ public class JSX {
 	 * @throws JSXLockException 
 	 * 
 	 */
-	public Map<String, Node> getMapIdElement(String nameElements) throws JSXLockException {
+	public Map<String, Node> getIdNodeMap(String nameElements) throws JSXLockException {
 		if (!tryLock()) return null;
 
-		Map<String, Node> nodeMap = XML_READER.getMapIdElement(nameElements);
+		Map<String, Node> nodeMap = XML_READER.getIdNodeMap(nameElements);
 		tryUnlock();
 		return nodeMap;
 	}
@@ -591,10 +600,10 @@ public class JSX {
 	 * @throws JSXLockException 
 	 */
 	/* metodo che ritorna lista di elementi con filtro nome e id */
-	public Node getElementById(String nameElement, String idElement) throws JSXLockException {
+	public Node getNodeById(String nameElement, String idElement) throws JSXLockException {
 		if (!tryLock()) return null;
 
-		Node node = XML_READER.getElementById(nameElement, idElement);
+		Node node = XML_READER.getNodeById(nameElement, idElement);
 		tryUnlock();
 		return node;
 	}
@@ -608,10 +617,10 @@ public class JSX {
 	 * @throws JSXLockException 
 	 */
 	/* metodo che ritorna lista di elementi figli */
-	public List<Node> getArrayChildNode(Node parentNode) throws JSXLockException {
+	public List<Node> getChildNodeList(Node parentNode) throws JSXLockException {
 		if (!tryLock()) return null;
 
-		List<Node> nodeList = XML_READER.getArrayChildNode(parentNode);
+		List<Node> nodeList = XML_READER.getChildNodeList(parentNode);
 		tryUnlock();
 		return nodeList;
 	}
@@ -627,10 +636,10 @@ public class JSX {
 	 * @throws JSXLockException 
 	 */
 	/* metodo che ritorna lista di elementi figli con filtro nome */
-	public List<Node> getArrayChildNode(Node parentNode, String nameElements) throws JSXLockException {
+	public List<Node> getChildNodeList(Node parentNode, String nameElements) throws JSXLockException {
 		if (!tryLock()) return null;
 
-		List<Node> nodeList = XML_READER.getArrayChildNode(parentNode, nameElements);
+		List<Node> nodeList = XML_READER.getChildNodeList(parentNode, nameElements);
 		tryUnlock();
 		return nodeList;
 	}
@@ -667,10 +676,10 @@ public class JSX {
 	 * @throws JSXLockException 
 	 */
 	/* metodo che ritorna mappa di id con nodi child con key id */
-	public Map<String, Node> getMapIdChildNode(Node parentNode, String nameElement) throws JSXLockException {
+	public Map<String, Node> getIdChildNodeMap(Node parentNode, String nameElement) throws JSXLockException {
 		if (!tryLock()) return null;
 
-		Map<String, Node> map = XML_READER.getMapIdChildNode(parentNode, nameElement);
+		Map<String, Node> map = XML_READER.getIdChildNodeMap(parentNode, nameElement);
 		tryUnlock();
 		return map;
 	}
@@ -689,12 +698,13 @@ public class JSX {
 	 * @throws JSXLockException
 	 */
 	public boolean tryLock() throws JSXLockException {
-		if (lock) {
-			try {
-				if (!REENTRANT_LOCK.tryLock(30, TimeUnit.SECONDS)) throw new JSXLockException("Error Timeout Reentrant Lock");
-			} catch (InterruptedException e) {
-				return false;
-			}
+		if (!lock) return true;
+
+		try {
+			if (!REENTRANT_LOCK.tryLock(30, TimeUnit.SECONDS)) throw new JSXLockException("Error Timeout Reentrant Lock");
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+			return false;
 		}
 		return true;
 	}
@@ -717,26 +727,37 @@ public class JSX {
 	 * @throws JSXLockException 
 	 */
 	/* salva modifiche nel file xml */
-	public void flush(String pathFile, boolean reloadDocument) throws JSXLockException {
+	public void flush() throws JSXLockException {
 		if (!tryLock()) return;
 
 		try {
-			TransformerFactory transformerFactory = TransformerFactory.newInstance();
-			Transformer transformer = transformerFactory.newTransformer();
-			if (indentAmount > 0) {
-				removeBlankLines();
-				transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-				transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", String.valueOf(indentAmount));
-			}
 			DOMSource source = new DOMSource(document);
-			StreamResult result = new StreamResult(new File(pathFile));
-			transformer.transform(source, result);
+			StreamResult result = new StreamResult(new File(filePath));
+
+			if (prettyOutput) {
+				TransformerFactory transformerFactory = TransformerFactory.newInstance();
+				Transformer transformer = transformerFactory.newTransformer();
+				removeBlankLines();
+				if (indentAmount > 0) {
+					transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+					transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", String.valueOf(indentAmount));
+				}
+				transformer.transform(source, result);
+			}
 		} catch (TransformerException e) {
 			e.printStackTrace();
 		} finally {
 			tryUnlock();
-			if (reloadDocument) loadDocument();
+			loadDocument();
 		}
+	}
+
+	/**
+	 * method to autoflush the document
+	 * @throws JSXLockException 
+	 */
+	private void autoflush() throws JSXLockException {
+		if (autoFlush) flush();
 	}
 
 	/**
@@ -755,13 +776,5 @@ public class JSX {
 		} finally {
 			tryUnlock();
 		}
-	}
-
-	/**
-	 * method to autoflush the document
-	 * @throws JSXLockException 
-	 */
-	private void autoflush() throws JSXLockException {
-		if (autoFlush) flush(filePath, true);
 	}
 }

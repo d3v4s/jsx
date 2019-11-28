@@ -247,7 +247,7 @@ public class WriterXML {
 	protected void deleteNode(String nameElement, String id) {
 		ReaderXML readerXML = new ReaderXML();
 		readerXML.setDocument(document);
-		Node node = readerXML.getMapIdElement(nameElement).get(id);
+		Node node = readerXML.getIdNodeMap(nameElement).get(id);
 		node.getParentNode().removeChild(node);
 	}
 
