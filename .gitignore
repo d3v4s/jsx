@@ -1,4 +1,5 @@
-jsx/bin/
-jsx/.settings/*
+/jsx/bin/
+/jsx/.settings/*
+/jsx/version
 LICENSE
 README.md
