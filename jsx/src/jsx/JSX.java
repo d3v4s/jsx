@@ -543,7 +543,6 @@ public class JSX {
 			e.printStackTrace();
 		} finally {
 			tryUnlock();
-			autoflush();
 		}
 	}
 
